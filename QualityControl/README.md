@@ -1,4 +1,4 @@
 # Quality control
-* Visualization
+* Visualization (try [MultiQC](https://multiqc.info/)?)
 * Trimming
 * Filtering
