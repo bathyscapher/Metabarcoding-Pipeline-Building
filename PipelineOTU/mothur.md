@@ -1,4 +1,5 @@
 # mothur pipeline
+mothur runs directly in the shell (command line/terminal). Calling `mothur` opens the program and the commands below can be run from there.
 
 Set working directory and specify number of available processors.
 ```
@@ -64,7 +65,7 @@ get.current()
 ```
 
 ## Detect chimeras
-Detect chimeras with vsearch and remove them.
+Detect chimeras with [vsearch](https://github.com/torognes/vsearch) and remove them.
 ```
 chimera.vsearch(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t)
 get.current()
@@ -88,7 +89,6 @@ get.current()
 ```
 
 ## Classify sequences
-
 ```
 classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=~/Desktop/SMP_unsynced/silva/16S-V4/silva.v132_16S-V4.align, taxonomy=~/Desktop/SMP_unsynced/silva/16S-V4/silva.v132_16S-V4.tax, cutoff=80)
 get.current()
@@ -141,7 +141,7 @@ get.current()
 ```
 
 ## Compute distance matrix and cluster OTUs
-Note: avoid cluster.split, results are not accurate.
+Note: avoid `cluster.split`, results are not accurate.
 ```
 dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.04)
 get.current()
@@ -151,7 +151,7 @@ get.current()
 ```
 
 ## Get OTU table
-Set the threshold (by convention 3~\% gap) and create the OTU-table.
+Set the threshold (by convention a 3 % barcoding gap) and create the OTU-table.
 ```
 make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 
