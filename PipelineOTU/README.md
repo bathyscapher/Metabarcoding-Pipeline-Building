@@ -7,7 +7,6 @@ Generally following the [MiSeq SOP](https://www.mothur.org/wiki/MiSeq_SOP)
 1. Chimera detection
 1. Singleton filtering
 1. Distance matrix
-1. Classify OTUs
-1. Amplicon sequence variants (ASV/ESV) vs. OTUs
-1. OTU clustering, generation and classification (taxonomy, methods)
-1. Taxonomic filtering
+1. OTU clustering and classification
+
+Useful links are the [mothur wiki](https://www.mothur.org/wiki/Main_Page), in particular the [mothur command page](https://www.mothur.org/wiki/Category:Commands) and the [manual](https://www.mothur.org/wiki/Mothur_manual).
