@@ -1,6 +1,5 @@
 # Pipeline building OTU
-Generally following the [MiSeq SOP](https://www.mothur.org/wiki/MiSeq_SOP)
-
+Generally following the [MiSeq SOP](https://www.mothur.org/wiki/MiSeq_SOP), the major steps are:
 1. Read merging/contigs assembly
 1. Alignment to reference database (SILVA)
 1. Pre-clustering
