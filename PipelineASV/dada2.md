@@ -1,4 +1,4 @@
-# SMP ASV
+# Pipeline Building ASV
 Clear workspace and set working directory and specify number of available processors.
 ```R
 rm(list = ls())
