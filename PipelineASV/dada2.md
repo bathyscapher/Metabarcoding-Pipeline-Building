@@ -1,4 +1,4 @@
-# Pipeline Building ASV
+# dada2 pipeline
 Clear workspace and set working directory and specify number of available processors.
 ```R
 rm(list = ls())
