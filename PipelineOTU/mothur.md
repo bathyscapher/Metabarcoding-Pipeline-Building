@@ -2,14 +2,14 @@
 mothur runs directly in the shell (command line/terminal). Calling `mothur` opens the program and the commands below can be run from there.
 
 Set working directory and specify number of available processors.
-```
+```sh
 set.dir(tempdefault=.)
 set.current(processors=6)
 ```
 
 ## Merge reads to contigs
 Give a prefix for the output files and merge the forward and reverse reads to contigs.
-```
+```sh
 make.file(inputdir=., type=gz, prefix=wine)
 make.contigs(file=wine.files)
 count.groups(group=wine.contigs.groups)
@@ -19,7 +19,7 @@ get.current()
 
 ## Quality trimming
 Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Length of EMP 16S amplicons = 300 to 350 bp.
-```
+```sh
 screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=250, maxlength=295, maxhomop=8)
 count.groups(group=wine.contigs.good.groups)
 summary.seqs(fasta=current)
@@ -27,7 +27,7 @@ get.current()
 ```
 
 Count redundant sequences to speed up computation.
-```
+```sh
 unique.seqs(fasta=wine.trim.contigs.good.fasta)
 count.seqs(name=wine.trim.contigs.good.names, group=wine.contigs.good.groups)
 summary.seqs(fasta=current, count=current)
@@ -35,20 +35,20 @@ summary.seqs(fasta=current, count=current)
 
 ## Align the contigs
 Align the contigs to the (customized) reference data base (SILVA).
-```
+```sh
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132_16S-V4.align, flip=f)
 summary.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table)
 get.current()
 ```
 
 Remove all sequences from the alignment that lie outside ?? and update the count table and summary file.
-```
+```sh
 screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9581)
 summary.seqs(fasta=current, count=current)
 ```
 
 ## Filter ...
-```
+```sh
 filter.seqs(fasta=wine.trim.contigs.good.unique.good.align, vertical=T, trump=.)
 unique.seqs(fasta=wine.trim.contigs.good.unique.good.filter.fasta, count=wine.trim.contigs.good.good.count_table)
 summary.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.fasta, count=wine.trim.contigs.good.unique.good.filter.count_table)
@@ -58,7 +58,7 @@ system(rm -f wine.filter)
 ## Precluster sequences
 Unify similar sequences (clusters sequences that are likely to be noisy!). A diff=2 refers to 4 nt for 2 seqs and thus, for 290 nt about 1.4 %. If diff = 3, 2.1 %, diff = 5, 3.4 %, diff
 = 6, 4.1 %.
-```
+```sh
 pre.cluster(fasta=wine.trim.contigs.good.unique.good.filter.unique.fasta, count=wine.trim.contigs.good.unique.good.filter.count_table, diffs=3, processors=6)
 summary.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.count_table)
 get.current()
@@ -66,7 +66,7 @@ get.current()
 
 ## Detect chimeras
 Detect chimeras with [vsearch](https://github.com/torognes/vsearch) and remove them.
-```
+```sh
 chimera.vsearch(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t)
 get.current()
 remove.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.accnos)
@@ -77,7 +77,7 @@ get.current()
 
 ## Remove singletons
 Remove all reads that occur only once.
-```
+```sh
 system(awk -e '{if ($2 < 50) { print $0 } }' wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
 remove.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
 #remove.seqs(count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
@@ -89,13 +89,13 @@ get.current()
 ```
 
 ## Classify sequences
-```
+```sh
 classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=~/Desktop/SMP_unsynced/silva/16S-V4/silva.v132_16S-V4.align, taxonomy=~/Desktop/SMP_unsynced/silva/16S-V4/silva.v132_16S-V4.tax, cutoff=80)
 get.current()
 ```
 
 ## Get phylotypes
-```
+```sh
 phylotype(taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.taxonomy)
 rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.tx.list, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.tx.org.list)
 get.current()
@@ -103,7 +103,7 @@ get.current()
 
 ## Extract OTUs at different taxa level
 Remove the multiple in-line headers from file. FNR: the record number (typically the line number).
-```
+```sh
 system(awk -e '{if (($1 != "label") || (FNR == 1)) { print $0 } }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.tx.list)
 
 make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=1)
@@ -135,14 +135,14 @@ get.current()
 
 ## Classify OTUs
 Find consensus taxonomy.
-```
+```sh
 classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.taxonomy)
 get.current()
 ```
 
 ## Compute distance matrix and cluster OTUs
 Note: avoid `cluster.split`, results are not accurate.
-```
+```sh
 dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.04)
 get.current()
 
@@ -152,7 +152,7 @@ get.current()
 
 ## Get OTU table
 Set the threshold (by convention a 3 % barcoding gap) and create the OTU-table.
-```
+```sh
 make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 
 #summary.single(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared)
@@ -161,26 +161,26 @@ count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 
 ## Count OTUs per sample
 **awk:** -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far.
-```
+```sh
 system(awk -v OFS='\t' -e '{notus=0; for (i=4; i<=NF; i++) { if ($i > 0) notus++; }; if (NR > 1) print $2 OFS notus; }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.sample.summary)
 get.current()
 ```
 
 ## Get representative sequences for OTUs
 = cluster centroids?
-```
+```sh
 get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 ```
 
 ## Classify clustered OTUs
-```
+```sh
 classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_16S_V4.wang.taxonomy, label=0.03)
 get.current()
 ```
 
 ## Rarefaction curves
 Rarefaction curves show if the sampling (here, sequencing) depth is sufficient.
-```
+```sh
 rarefaction.single(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared, calc=sobs, freq=100)
 ```
