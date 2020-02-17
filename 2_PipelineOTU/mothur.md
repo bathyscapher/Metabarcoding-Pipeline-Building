@@ -18,9 +18,9 @@ get.current()
 ```
 
 ## Quality trimming
-Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from previous `summary.seqs()`. ???Amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 390 bp???
+Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from previous `summary.seqs()`. The expected amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 300 to 350 bp.
 ```bash
-screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=250, maxlength=295, maxhomop=8)
+screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=290, maxlength=295, maxhomop=8)
 count.groups(group=wine.contigs.good.groups)
 summary.seqs(fasta=current)
 get.current()
@@ -33,22 +33,24 @@ count.seqs(name=wine.trim.contigs.good.names, group=wine.contigs.good.groups)
 summary.seqs(fasta=current, count=current)
 ```
 
-## Align the contigs
-Align the contigs to the (customized) SILVA reference data base.
+## Align the contigs to SILVA
+Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
+
+? How can the range in coordinates stretch so far over SILVA?
+
 ```bash
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132.align, flip=f)
 summary.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table)
 get.current()
 ```
 
-Remove all sequences from the alignment that are outliers??.
+Screen once more, to ensure that all sequences overlap the same region.
 ```bash
 screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9581)
 summary.seqs(fasta=current, count=current)
 ```
 
-## Remove empty columns
-Remove columns that contain only gaps and grap unique sequences only.
+Remove columns that contain only gaps (they stem from the alignment) and grab unique sequences only.
 ```bash
 filter.seqs(fasta=wine.trim.contigs.good.unique.good.align, vertical=T, trump=.)
 unique.seqs(fasta=wine.trim.contigs.good.unique.good.filter.fasta, count=wine.trim.contigs.good.good.count_table)
@@ -57,7 +59,7 @@ system(rm -f wine.filter)
 ```
 
 ## Precluster sequences
-Unify similar sequences, i.e. cluster sequences that probably are noisy.
+Unify similar sequences, i.e. cluster sequences that probably are noisy (according to P. Schloss: allow 1 difference for every 100 bp of sequence) aka "denoising".
 
 **diff** | **2** | **3** | **5** | **6**
 :--- | ---: | ---: | ---: | ---:
@@ -82,13 +84,12 @@ get.current()
 ```
 
 ## Remove singletons
-Remove all reads that occur only once and update statistics.
+Remove all reads that occur only once from the current fasta and count_table and update statistics.
 ```bash
-system(awk -e '{if ($2 < 50) { print $0 } }' wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
+system(awk -e '{if ($2 < 2) {print $1}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
 
 remove.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
 remove.seqs(count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
-#system(bash removeSeqsFromCountTable16S.sh)
 
 count.groups(count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table)
 summary.seqs(fasta=current, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table)
