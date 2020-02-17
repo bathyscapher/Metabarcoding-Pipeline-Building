@@ -34,9 +34,9 @@ summary.seqs(fasta=current, count=current)
 ```
 
 ## Align the contigs to SILVA
-Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
+* How can the range in coordinates stretch so far over SILVA?
 
-? How can the range in coordinates stretch so far over SILVA?
+Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
 
 ```bash
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132.align, flip=f)
@@ -76,9 +76,9 @@ get.current()
 Detect chimeras with [vsearch](https://github.com/torognes/vsearch) and remove them.
 ```bash
 chimera.vsearch(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t)
-get.current()
 remove.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.accnos)
 count.groups(count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table)
+
 summary.seqs(fasta=current, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table)
 get.current()
 ```
@@ -97,6 +97,8 @@ get.current()
 ```
 
 ## Classify sequences
+* Only to remove lineages?
+
 Assign sequences to the reference database and taxonomy with the [Ribosomal Database Project (RDP) classifier](https://aem.asm.org/content/73/16/5261).
 ```bash
 classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132.align, taxonomy=silva.v132.tax, method=wang, cutoff=80)
@@ -112,9 +114,9 @@ get.current()
 ```
 
 ## Extract OTUs at different taxa level
-First, remove the multiple in-line headers from the file. Then, create `.shared` files for all six taxonomic levels (1 = , 2 = , 3 = , 4 = , 5 = , 6 = ).
+First, remove the multiple in-line headers from the file with [awk](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = , 2 = , 3 = , 4 = , 5 = , 6 = ).
 ```bash
-system(awk -e '{if (($1 != "label") || (FNR == 1)) { print $0 } }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list)
+system(awk -e '{if (($1 != "label") || (FNR == 1)) {print $0}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list)
 
 make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=1)
 count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
@@ -144,6 +146,8 @@ get.current()
 ```
 
 ## Classify OTUs
+* Not only after creating the distance matrix?
+
 Find consensus taxonomy for an OTU.
 ```bash
 classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
@@ -151,7 +155,7 @@ get.current()
 ```
 
 ## Compute distance matrix and cluster OTUs
-Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.04 are ignored to safe resources (note: avoid `cluster.split`, results are not accurate). Then, assign this sequences to OTUs with clustering using the ??`opti`?? method.
+Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.04 are ignored to safe resources (note: avoid `cluster.split`, results are not accurate). Then, assign this sequences to OTUs with clustering using the `opti` method.
 ```bash
 dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.04)
 get.current()
