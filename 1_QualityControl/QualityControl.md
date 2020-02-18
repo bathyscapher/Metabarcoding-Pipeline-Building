@@ -5,7 +5,7 @@ rename -n 's/_17_16S//' *fastq.gz
 ```
 
 
-Filter  and trim the reads. Place filtered FASTQ in `filtered` subdirectory. Exemplarily, compare read quality profiles raw and filtered.
+Filter  and trim the reads. Place filtered FASTQ in `filtered` subdirectory. Exemplarily, compare raw and filtered read quality profiles.
 ```R
 rF.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
 rR.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
