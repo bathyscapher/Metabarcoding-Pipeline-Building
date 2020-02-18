@@ -93,21 +93,6 @@ saveRDS(seqtab.nochim, "seqtab.nochim.rds")
 # seqtab.nochim <- readRDS("seqtab.nochim.rds")
 ```
 
-## Track reads through the pipeline
-To survey where the reads are 'lost'.
-```R
-getN <- function(x){
-  sum(getUniques(x))
-  }
-
-track <- cbind(out, sapply(dadaF, getN), sapply(dadaR, getN),
-               sapply(contigs, getN), rowSums(seqtab.nochim))
-
-colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged",
-                     "nonchim")
-rownames(track) <- sample.names
-head(track)
-``````
 
 ## Assign taxonomy with IdTaxa and SILVA
 Convert the chimera-cleaned sequences into a 'DNAStringSet', load the SILVA db and classify the sequences.
@@ -133,4 +118,21 @@ rownames(taxid) <- getSequences(seqtab.nochim)
 
 saveRDS(taxid, "taxaid.rds")
 # taxaid <- readRDS("taxaid.rds")
+```
+
+
+## Track reads
+Survey where the reads are 'lost' in the pipeline.
+```R
+getN <- function(x){
+  sum(getUniques(x))
+  }
+
+track <- cbind(out, sapply(dadaF, getN), sapply(dadaR, getN),
+               sapply(contigs, getN), rowSums(seqtab.nochim))
+
+colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged",
+                     "nonchim")
+rownames(track) <- sample.names
+head(track)
 ```
