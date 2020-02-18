@@ -203,6 +203,7 @@ Returns a FASTA file where the headers additionally carry the OTU number and the
 get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 ```
 
+
 ## Classify clustered OTUs
 Get consenus taxonomy for OTUs.
 ```bash
@@ -215,4 +216,10 @@ get.current()
 Calculate sample-wise rarefaction curves to control for sufficient sampling (here, sequencing) depth.
 ```bash
 rarefaction.single(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared, calc=sobs, freq=100)
+```
+
+## Track reads
+Survey where the reads are 'lost' in the pipeline.
+```bash
+awk -f ~/Documents/PhDFribourg/bash/transposeList2Table.awk <(grep ’mothur > \|# of’ mothur.*.logfile | grep ’# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos’ | sed -r ’s/mothur > /mothur:/’ | sed -r ’s/mothur/\nmothur/’ | sed -r ’s/\t/ /’ | sed -r ’s/#/Number/’) > countReadsMothur.csv
 ```
