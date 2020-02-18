@@ -1,5 +1,5 @@
 # dada2 pipeline
-Clear workspace and set working directory and specify number of available processors.
+Clear workspace, set working directory and specify number of available processors.
 ```R
 rm(list = ls())
 setwd("...")
@@ -7,11 +7,10 @@ setwd("...")
 library("dada2")
 library("DECIPHER")
 library("ggplot2")
-  theme_set(theme_bw(base_size = 15) +
-    theme(rect = element_rect(fill = "transparent")))
+  theme_set(theme_bw(base_size = 15)
 library("phyloseq")
 
-ncore <- 6 # specify number of available cores
+ncore <- 6 # number of available cores
 ```
 
 ## Read fastq files
@@ -26,27 +25,16 @@ sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
 ```
 
 
-## Quality control
-Filter  and trim the reads. Place filtered files in filtered/ subdirectory. Compare read quality profiles before and after filtering exemplarily.
+## Error rates
+Get the file names.
 ```R
 rF.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
 rR.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
 
 names(rF.f) <- sample.names
 names(rR.f) <- sample.names
-
-out <- filterAndTrim(rF, rF.f, rR, rR.f,
-                     maxN = 0, maxEE = c(2,2), truncQ = 10, rm.phix = TRUE,
-                     compress = TRUE, multithread = ncore)
-
-plotQualityProfile(rF[1:3])
-plotQualityProfile(rF.f[1:3])
-plotQualityProfile(rR[1:3])
-plotQualityProfile(rR.f[1:3])
 ```
 
-
-## Error rates
 Estimate and plot the error rates.
 ```
 errF <- learnErrors(rF.f, multithread = ncore)
