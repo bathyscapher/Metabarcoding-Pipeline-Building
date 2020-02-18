@@ -1,17 +1,19 @@
 # mothur pipeline
-mothur runs directly in the shell (command line/terminal). Calling `mothur` opens the program and the commands below can be run from there.
+Open `mothur` directly in the shell (command line/terminal). Calling `mothur` opens the program and the commands below can be run from there.
 
 Set working directory and specify number of available processors.
 ```bash
 set.dir(tempdefault=.)
 set.current(processors=6)
 ```
+*Note*: run `nproc` to see number of available processors.
 
 ## Merge reads to contigs
-Create a metafile listing all the fastq in the directory with a given prefix (`wine.files`). Then, merge the forward and reverse reads to contigs with the [Needleman-Wunsch algorithm](https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm) and show summary statistics.
+Create a metafile listing all the fastq in the directory with a given prefix (`wine.files`). Then, merge the forward and reverse reads to contigs with the [Needleman-Wunsch algorithm](https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm).
 ```bash
 make.file(inputdir=., type=gz, prefix=wine)
 make.contigs(file=wine.files, align=needleman)
+
 count.groups(group=wine.contigs.groups)
 summary.seqs()
 get.current()
@@ -21,6 +23,7 @@ get.current()
 Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from previous `summary.seqs()`. The expected amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 300 to 350 bp.
 ```bash
 screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=290, maxlength=295, maxhomop=8)
+
 count.groups(group=wine.contigs.good.groups)
 summary.seqs(fasta=current)
 get.current()
@@ -29,6 +32,7 @@ get.current()
 Count and exclude redundant sequences to speed up computation.
 ```bash
 unique.seqs(fasta=wine.trim.contigs.good.fasta)
+
 count.seqs(name=wine.trim.contigs.good.names, group=wine.contigs.good.groups)
 summary.seqs(fasta=current, count=current)
 ```
@@ -38,8 +42,11 @@ summary.seqs(fasta=current, count=current)
 
 Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
 
+*Note:* instructions to taylor the SILVA database to your primers are [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
+
 ```bash
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132.align, flip=f)
+
 summary.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table)
 get.current()
 ```
@@ -47,6 +54,7 @@ get.current()
 Screen once more, to ensure that all sequences overlap the same region.
 ```bash
 screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9581)
+
 summary.seqs(fasta=current, count=current)
 ```
 
@@ -54,6 +62,7 @@ Remove columns that contain only gaps (they stem from the alignment) and grab un
 ```bash
 filter.seqs(fasta=wine.trim.contigs.good.unique.good.align, vertical=T, trump=.)
 unique.seqs(fasta=wine.trim.contigs.good.unique.good.filter.fasta, count=wine.trim.contigs.good.good.count_table)
+
 summary.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.fasta, count=wine.trim.contigs.good.unique.good.filter.count_table)
 system(rm -f wine.filter)
 ```
@@ -68,6 +77,7 @@ Unify similar sequences, i.e. cluster sequences that probably are noisy (accordi
 
 ```bash
 pre.cluster(fasta=wine.trim.contigs.good.unique.good.filter.unique.fasta, count=wine.trim.contigs.good.unique.good.filter.count_table, diffs=3, processors=6)
+
 summary.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.count_table)
 get.current()
 ```
@@ -102,6 +112,7 @@ get.current()
 Assign sequences to the reference database and taxonomy with the [Ribosomal Database Project (RDP) classifier](https://aem.asm.org/content/73/16/5261).
 ```bash
 classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132.align, taxonomy=silva.v132.tax, method=wang, cutoff=80)
+
 get.current()
 ```
 
@@ -110,11 +121,12 @@ Assign sequences to OTUs based on their taxonomy and outputs a .list, .rabund an
 ```bash
 phylotype(taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
 rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list)
+
 get.current()
 ```
 
 ## Extract OTUs at different taxa level
-First, remove the multiple in-line headers from the file with [awk](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = , 2 = , 3 = , 4 = , 5 = , 6 = ).
+First, remove the multiple in-line headers from the file with [awk](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = domain, 2 = phylum, 3 = order, 4 = class?, 5 = family, 6 = genus).
 ```bash
 system(awk -e '{if (($1 != "label") || (FNR == 1)) {print $0}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list)
 
@@ -151,42 +163,43 @@ get.current()
 Find consensus taxonomy for an OTU.
 ```bash
 classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
+
 get.current()
 ```
 
 ## Compute distance matrix and cluster OTUs
-Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.04 are ignored to safe resources (note: avoid `cluster.split`, results are not accurate). Then, assign this sequences to OTUs with clustering using the `opti` method.
+Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.04 are ignored to safe resources (note: avoid `cluster.split`, results are inaccurate). Then, cluster this sequences into OTUs using the `opti` method.
 ```bash
 dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.04)
+
 get.current()
 
 cluster(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, cutoff=0.03, method=opti)
+
 get.current()
 ```
 
 ## Get OTU table
-Create a .shared and a .rabund file for each group. Set the threshold (by convention a 3 % barcoding gap) and create the OTU-table.
+Create a .shared and a .rabund file samplewise. Set the threshold (by convention a 3 % barcoding gap) and create the OTU-table.
 ```bash
 make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 
-#summary.single(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared)
 count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared)
 ```
 
 ## Count OTUs per sample
-Use [awk](https://en.wikipedia.org/wiki/AWK) to count &alpha;-diversity sample-wise (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
+Count &alpha;-diversity sample-wise with [awk](https://en.wikipedia.org/wiki/AWK) (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
 ```bash
 system(awk -v OFS='\t' -e '{notus=0; for (i=4; i<=NF; i++) { if ($i > 0) notus++; }; if (NR > 1) print $2 OFS notus; }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.sample.summary)
+
 get.current()
 ```
 
 ## Get representative sequences for OTUs
-= cluster centroids?
+* = cluster centroids?
 
 Returns a FASTA file where the headers additionally carry the OTU number and the total abundance.
 ```bash
-#get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
-
 get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
 ```
 
@@ -194,6 +207,7 @@ get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 Get consenus taxonomy for OTUs.
 ```bash
 classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy, label=0.03)
+
 get.current()
 ```
 
