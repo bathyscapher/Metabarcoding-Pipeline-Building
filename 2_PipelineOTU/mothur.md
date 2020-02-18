@@ -94,7 +94,7 @@ get.current()
 ```
 
 ## Remove singletons
-Remove all reads that occur only once from the current fasta and count_table and update statistics.
+Generate a file containing all singletons with [AWK](https://en.wikipedia.org/wiki/AWK) and remove them from the current fasta and count_table.
 ```bash
 system(awk -e '{if ($2 < 2) {print $1}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.single.accnos)
 
@@ -126,7 +126,7 @@ get.current()
 ```
 
 ## Extract OTUs at different taxa level
-First, remove the multiple in-line headers from the file with [awk](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = domain, 2 = phylum, 3 = order, 4 = class?, 5 = family, 6 = genus).
+First, remove the multiple in-line headers from the file with [AWK](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = domain, 2 = phylum, 3 = order, 4 = class?, 5 = family, 6 = genus).
 ```bash
 system(awk -e '{if (($1 != "label") || (FNR == 1)) {print $0}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list)
 
@@ -188,7 +188,7 @@ count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 ```
 
 ## Count OTUs per sample
-Count &alpha;-diversity sample-wise with [awk](https://en.wikipedia.org/wiki/AWK) (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
+Count &alpha;-diversity sample-wise with [AWK](https://en.wikipedia.org/wiki/AWK) (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
 ```bash
 system(awk -v OFS='\t' -e '{notus=0; for (i=4; i<=NF; i++) { if ($i > 0) notus++; }; if (NR > 1) print $2 OFS notus; }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.sample.summary)
 
