@@ -68,7 +68,7 @@ system(rm -f wine.filter)
 ```
 
 ## Precluster sequences
-Unify similar sequences, i.e. cluster sequences that probably are noisy (according to P. Schloss: allow 1 difference for every 100 bp of sequence) aka "denoising".
+Unify similar sequences, i.e. cluster sequences that probably are noisy aka "denoising" (according to the MiSeq SOP, allow 1 difference for every 100 bp of sequence).
 
 **diff** | **2** | **3** | **5** | **6**
 :--- | ---: | ---: | ---: | ---:
@@ -117,7 +117,7 @@ get.current()
 ```
 
 ## Get phylotypes
-Assign sequences to OTUs based on their taxonomy and outputs a .list, .rabund and .sabund file.
+Assign sequences to OTUs based on their taxonomy and create a .list, .rabund and .sabund file.
 ```bash
 phylotype(taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
 rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list)
@@ -168,9 +168,9 @@ get.current()
 ```
 
 ## Compute distance matrix and cluster OTUs
-Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.04 are ignored to safe resources (note: avoid `cluster.split`, results are inaccurate). Then, cluster this sequences into OTUs using the `opti` method.
+Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.1 are ignored to safe resources (note: avoid `cluster.split`, results are inaccurate). Then, cluster this sequences into OTUs with the [OptiClust](https://msphere.asm.org/content/2/2/e00073-17) method.
 ```bash
-dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.04)
+dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.1)
 
 get.current()
 
