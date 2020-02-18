@@ -7,7 +7,7 @@
 ################################################################################
 ################################################################################
 ### To create countReadsMothur.csv, run in directory with mothur results:
-### awk -f transposeList2Table.awk <(grep 'mothur > \|# of' mothur.1571401159.logfile | grep '# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos' | sed -r 's/mothur > /mothur: /' | sed -r 's/mothur/\nmothur/' | sed -r 's/\t/ /' | sed -r 's/#/Number/') > countReadsMothur.csv
+### awk -f transposeList2Table.awk <(grep 'mothur > \|# of' mothur.*.logfile | grep '# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos' | sed -r 's/mothur > /mothur: /' | sed -r 's/mothur/\nmothur/' | sed -r 's/\t/ /' | sed -r 's/#/Number/') > countReadsMothur.csv
 ################################################################################
 ################################################################################
 
