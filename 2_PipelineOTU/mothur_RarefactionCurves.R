@@ -10,8 +10,7 @@
 rm(list = ls())
 
 library("ggplot2")
-theme_set(theme_bw(base_size = 20) +
-            theme(rect = element_rect(fill = "transparent")))
+theme_set(theme_bw(base_size = 12)
 library("reshape2")
 
 setwd("~")
