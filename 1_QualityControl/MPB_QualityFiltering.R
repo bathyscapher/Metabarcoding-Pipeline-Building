@@ -9,17 +9,16 @@
 
 rm(list = ls())
 
-setwd("/scratch/PromESSinG/16S/")
+setwd("...")
 
 
-library("dada2") #; packageVersion("dada2")
-library("DECIPHER")#; packageVersion("DECIPHER")
+library("dada2")
+library("DECIPHER")
 library("gridExtra")
 
 
 ################################################################################
 ncore <- 9 # number of available processors
-
 
 list.files(pattern = "fastq.gz")
 
@@ -46,7 +45,6 @@ FASTQ.f <- filterAndTrim(rF, rF.f, rR, rR.f,
 ### Plot quality profiles
 set.seed(74398)
 startPlot <- ceiling(runif(1, 0, length(rF) - 3))
-
 
 plot.rF <- plotQualityProfile(rF[startPlot:(startPlot + 2)])
 plot.rF.f <- plotQualityProfile(rF.f[startPlot:(startPlot + 2)])
