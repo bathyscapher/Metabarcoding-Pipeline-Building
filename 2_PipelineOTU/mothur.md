@@ -227,4 +227,4 @@ awk -f ~/Documents/PhDFribourg/bash/transposeList2Table.awk <(grep ’mothur > \
 ```
 Further process them with [this R script](mothur_TrackReads.R).
 
-![here](/Graphs/mothur_TrackReads.png)
+![Reads loss in the mothur pipeline](/Graphs/mothur_TrackReads.png)
