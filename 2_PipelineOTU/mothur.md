@@ -42,7 +42,7 @@ summary.seqs(fasta=current, count=current)
 
 Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
 
-*Note:* instructions to taylor the SILVA database to your primers are [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
+*Note:* instructions to taylor the SILVA database to specific primers are [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
 
 ```bash
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132.align, flip=f)
