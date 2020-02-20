@@ -87,8 +87,8 @@ Detect chimeras with [vsearch](https://github.com/torognes/vsearch) and remove t
 ```bash
 chimera.vsearch(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t)
 remove.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.fasta, accnos=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.accnos)
-count.groups(count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table)
 
+count.groups(count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table)
 summary.seqs(fasta=current, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table)
 get.current()
 ```
@@ -187,8 +187,8 @@ make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pic
 count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared)
 ```
 
-## Count OTUs per sample
-Count &alpha;-diversity sample-wise with [AWK](https://en.wikipedia.org/wiki/AWK) (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
+## Count &alpha;-diversity
+Count OTUs sample-wise with [AWK](https://en.wikipedia.org/wiki/AWK) (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
 ```bash
 system(awk -v OFS='\t' -e '{notus=0; for (i=4; i<=NF; i++) { if ($i > 0) notus++; }; if (NR > 1) print $2 OFS notus; }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.sample.summary)
 
