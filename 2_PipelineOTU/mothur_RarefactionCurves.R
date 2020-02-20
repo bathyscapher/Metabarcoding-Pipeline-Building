@@ -10,7 +10,7 @@
 rm(list = ls())
 
 library("ggplot2")
-theme_set(theme_bw(base_size = 12)
+theme_set(theme_bw(base_size = 12))
 library("reshape2")
 
 setwd("~")
