@@ -58,7 +58,7 @@ Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) referen
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132_EMP16S.align, flip=f)
 
 ### 18S
-align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=~/Desktop/SMP_unsynced/silva/EMP-18S/silva.v132_EMP18S.align, flip=f)
+align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132_EMP18S.align, flip=f)
 
 summary.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table)
 get.current()
