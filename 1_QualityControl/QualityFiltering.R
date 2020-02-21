@@ -13,7 +13,6 @@ setwd("...")
 
 
 library("dada2")
-library("DECIPHER")
 library("gridExtra")
 
 
