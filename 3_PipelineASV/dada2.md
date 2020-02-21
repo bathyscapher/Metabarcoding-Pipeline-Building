@@ -6,9 +6,6 @@ setwd("...")
 
 library("dada2")
 library("DECIPHER")
-library("ggplot2")
-  theme_set(theme_bw(base_size = 15)
-library("phyloseq")
 
 ncore <- 6 # number of available cores
 ```
@@ -23,7 +20,6 @@ rR <- sort(list.files(pattern = "_R2.fastq.gz", full.names = TRUE))
 
 sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
 ```
-
 
 ## Error rates
 Get the file names.
@@ -44,6 +40,8 @@ plotErrors(errF, nominalQ = TRUE)
 plotErrors(errR, nominalQ = TRUE)
 ```
 
+![dada2 error rates](/Graphs/dada2_ErrorRates.png)
+
 
 ## Core sample inference algorithm
 ```R
@@ -59,7 +57,6 @@ saveRDS(dadaR, "dadaR.rds")
 # dadaF <- readRDS("dadaF.rds")
 # dadaR <- readRDS("dadaR.rds")
 ```
-
 
 ## Merge paired reads
 ```R
@@ -93,7 +90,6 @@ saveRDS(seqtab.nochim, "seqtab.nochim.rds")
 # seqtab.nochim <- readRDS("seqtab.nochim.rds")
 ```
 
-
 ## Assign taxonomy with IdTaxa and SILVA
 Convert the chimera-cleaned sequences into a 'DNAStringSet', load the SILVA db and classify the sequences.
 ```R
@@ -119,7 +115,6 @@ rownames(taxid) <- getSequences(seqtab.nochim)
 saveRDS(taxid, "taxaid.rds")
 # taxaid <- readRDS("taxaid.rds")
 ```
-
 
 ## Track reads
 Survey where the reads are 'lost' in the pipeline.
