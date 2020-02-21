@@ -1,10 +1,10 @@
-# split lines on ": " and use "|" for output field separator
+# Split lines on ": " and use "|" for output field separator
 BEGIN { FS = ": "; i = 0; h = 0; ofs = "\t" }
 
-# empty line - increment item count and skip it
-/^\s*$/ { i++ ; next } 
+# Skip empty line and increment item count
+/^\s*$/ {i++ ; next} 
 
-# normal line - add the item to the object and the header to the header list
+# Add the item to the object and the header to the header list
 # and keep track of first seen order of headers
 {
    current[i, $1] = $2
