@@ -1,4 +1,7 @@
 # mothur pipeline
+## 16S & 18S
+The pipeline is basically the same for 16S and 18S. Exceptions are the SILVA reference database as it was customized to each primer pair and some consequential steps - such cases are highlighted. 
+
 Open `mothur` directly in the shell (command line/terminal). Calling `mothur` opens the program and the commands below can be run from there.
 
 Set working directory and specify number of available processors.
@@ -20,9 +23,15 @@ get.current()
 ```
 
 ## Quality trimming
-Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from previous `summary.seqs()`. The expected amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 300 to 350 bp.
+Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from previous `summary.seqs()`.
+
+The expected amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 300 to 350 bp, the [EMP 18S primers](http://www.earthmicrobiome.org/protocols-and-standards/18s/) about 260 +/- 50 bp.
 ```bash
+### 16S
 screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=290, maxlength=295, maxhomop=8)
+
+### 18S
+screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=300, maxlength=340, maxhomop=15)
 
 count.groups(group=wine.contigs.good.groups)
 summary.seqs(fasta=current)
@@ -45,7 +54,11 @@ Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) referen
 *Note:* instructions to taylor the SILVA database to specific primers are [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
 
 ```bash
-align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132.align, flip=f)
+### 16S
+align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132_EMP16S.align, flip=f)
+
+### 18S
+align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=~/Desktop/SMP_unsynced/silva/EMP-18S/silva.v132_EMP18S.align, flip=f)
 
 summary.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table)
 get.current()
@@ -53,7 +66,11 @@ get.current()
 
 Screen once more, to ensure that all sequences overlap the same region.
 ```bash
+### 16S
 screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9581)
+
+### 18S
+screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=4, end=562)
 
 summary.seqs(fasta=current, count=current)
 ```
@@ -111,7 +128,11 @@ get.current()
 
 Assign sequences to the reference database and taxonomy with the [Ribosomal Database Project (RDP) classifier](https://aem.asm.org/content/73/16/5261).
 ```bash
-classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132.align, taxonomy=silva.v132.tax, method=wang, cutoff=80)
+### 16S
+classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132_EMP16S.align, taxonomy=silva.v132_EMP16S.tax, method=wang, cutoff=80)
+
+### 18S
+classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132_EMP18S.align, taxonomy=silva.v132_EMP18S.tax, cutoff=80)
 
 get.current()
 ```
@@ -119,8 +140,13 @@ get.current()
 ## Get phylotypes
 Assign sequences to OTUs based on their taxonomy and create a .list, .rabund and .sabund file.
 ```bash
-phylotype(taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list)
+### 16S
+phylotype(taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.taxonomy)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.org.list)
+
+### 16S
+phylotype(taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.taxonomy)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.org.list)
 
 get.current()
 ```
@@ -128,31 +154,59 @@ get.current()
 ## Extract OTUs at different taxa level
 First, remove the multiple in-line headers from the file with [AWK](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = domain, 2 = phylum, 3 = order, 4 = class?, 5 = family, 6 = genus).
 ```bash
-system(awk -e '{if (($1 != "label") || (FNR == 1)) {print $0}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list)
+### 16S
+system(awk -e '{if (($1 != "label") || (FNR == 1)) {print $0}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list)
 
-make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=1)
-count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.1.shared)
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=1)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.1.shared)
 
-make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=2)
-count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.2.shared)
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=2)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.2.shared)
 
-make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=3)
-count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.3.shared)
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=3)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.3.shared)
 
-make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=4)
-count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.4.shared)
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=4)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.4.shared)
 
-make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=5)
-count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.5.shared)
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=5)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.5.shared)
 
-make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=6)
-count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared)
-rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.tx.6.shared)
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=6)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.tx.6.shared)
+
+### 18S
+system(awk -e '{if (($1 != "label") || (FNR == 1)) {print $0}}' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.org.list > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list)
+
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=1)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.1.shared)
+
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=2)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.2.shared)
+
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=3)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.3.shared)
+
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=4)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.4.shared)
+
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=5)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.5.shared)
+
+make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=6)
+count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared)
+rename.file(input=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.shared, new=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.tx.6.shared)
 
 get.current()
 ```
@@ -162,7 +216,11 @@ get.current()
 
 Find consensus taxonomy for an OTU.
 ```bash
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
+### 16S
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
+
+### 18S
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
 
 get.current()
 ```
@@ -207,7 +265,11 @@ get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 ## Classify clustered OTUs
 Get consenus taxonomy for OTUs.
 ```bash
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy, label=0.03)
+### 16S
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.taxonomy, label=0.03)
+
+### 18S
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.taxonomy, label=0.03)
 
 get.current()
 ```
@@ -219,11 +281,12 @@ rarefaction.single(shared=wine.trim.contigs.good.unique.good.filter.unique.precl
 ```
 Further process them with [this R script](mothur_RarefactionCurves.R).
 
+![Rarefaction curves](/Graphs/mothur_RarefactionCurves.png)
 
 ## Track reads
 Survey where the reads are 'lost' in the pipeline.
 ```bash
-awk -f ~/Documents/PhDFribourg/bash/transposeList2Table.awk <(grep ’mothur > \|# of’ mothur.*.logfile | grep ’# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos’ | sed -r ’s/mothur > /mothur:/’ | sed -r ’s/mothur/\nmothur/’ | sed -r ’s/\t/ /’ | sed -r ’s/#/Number/’) > countReadsMothur.csv
+awk -f transposeList2Table.awk <(grep ’mothur > \|# of’ mothur.*.logfile | grep ’# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos’ | sed -r ’s/mothur > /mothur:/’ | sed -r ’s/mothur/\nmothur/’ | sed -r ’s/\t/ /’ | sed -r ’s/#/Number/’) > countReadsMothur.csv
 ```
 Further process them with [this R script](mothur_TrackReads.R).
 
