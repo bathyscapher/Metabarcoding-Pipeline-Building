@@ -11,4 +11,8 @@ In this workshop the participants will be introduced to the workflow of microbio
 * DECIPHER (R package)
 * phyloseq (R package)
 * ggplot2 (R package)
+* reshape2 (R package)
 * Linux terminal
+
+## To do
+* track total reads in dada2
