@@ -37,8 +37,8 @@ plotErrors(errF, nominalQ = TRUE)
 plotErrors(errR, nominalQ = TRUE)
 ```
 
-![dada2 error rates](/Graphs/dada2_ErrorRates.png)
-
+![dada2 error rates 16S](/Graphs/dada2_ErrorRates.png)
+![dada2 error rates 18S](/Graphs/dada2_ErrorRates_18S.png)
 
 ## Core sample inference algorithm
 ```R
@@ -122,3 +122,5 @@ colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged",
 rownames(track) <- sample.names
 head(track)
 ```
+
+![dada2 track reads](/Graphs/dada2_TrackReads.png)
