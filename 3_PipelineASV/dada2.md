@@ -21,8 +21,13 @@ rR <- sort(list.files(pattern = "_R2.fastq.gz", full.names = TRUE))
 
 sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
 
+### 16S
 rF.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
 rR.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
+
+### 18S
+rF.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
+rR.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
 
 names(rF.f) <- sample.names
 names(rR.f) <- sample.names
@@ -107,7 +112,7 @@ taxa.id <- t(sapply(ids, function(x) {
 colnames(taxa.id) <- ranks
 rownames(taxa.id) <- getSequences(asv.tab.nochim)
 
-saveRDS(taxa.id, "taxaid.rds")
+saveRDS(taxa.id, "taxa.id.rds")
 ```
 
 
