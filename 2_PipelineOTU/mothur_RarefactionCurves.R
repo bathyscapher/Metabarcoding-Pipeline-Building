@@ -10,16 +10,16 @@
 rm(list = ls())
 
 library("ggplot2")
-theme_set(theme_bw(base_size = 12))
+  theme_set(theme_bw(base_size = 20))
 library("reshape2")
 
-setwd("~")
+setwd("/scratch/PromESSinG/")
 
 ################################################################################
-# list.files(path = ".", pattern = "rare", recursive = TRUE)
+list.files(path = ".", pattern = "rare", recursive = TRUE)
 
 ### 16S
-rarefied16S <- read.table("16S/wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.groups.rarefaction"
+rarefied16S <- read.table("prok/filtered/wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.groups.rarefaction"
                           ,
                           sep = "\t", header = TRUE, check.names = FALSE)
 
@@ -46,8 +46,10 @@ rarefied16S.hci.m <- melt(rarefied16S.hci, id = "numsampled",
 
 rarefied16S.sample.m$Sample <- as.factor(gsub("0.03-", "",
                                               rarefied16S.sample.m$Sample))
-rarefied16S.lci.m$Sample <- as.factor(gsub("lci-", "", rarefied16S.lci.m$Sample))
-rarefied16S.hci.m$Sample <- as.factor(gsub("hci-", "", rarefied16S.hci.m$Sample))
+rarefied16S.lci.m$Sample <- as.factor(gsub("lci-", "",
+                                           rarefied16S.lci.m$Sample))
+rarefied16S.hci.m$Sample <- as.factor(gsub("hci-", "",
+                                           rarefied16S.hci.m$Sample))
 
 
 rarefied16S.merged <- merge(rarefied16S.sample.m, rarefied16S.lci.m,
@@ -58,20 +60,12 @@ rarefied16S.merged <- merge(rarefied16S.merged, rarefied16S.hci.m,
 rm(rarefied16S, rarefied16S.hci, rarefied16S.hci.m, rarefied16S.lci,
    rarefied16S.lci.m, rarefied16S.sample, rarefied16S.sample.m, numsampled)
 
-
-rarefied16S.merged$Site <- as.factor(gsub(".{5}$", "",
-                                          rarefied16S.merged$Sample))
-# rarefied16S.merged$Site <- ordered(rarefied16S.merged$Site,
-#                                    levels = c("CB", "LT", "LE", "LV", "LM",
-#                                               "MC", "NC"))
-rarefied16S.merged$Succession <- as.factor(gsub("^.{6}", "",
-                                                rarefied16S.merged$Sample))
 rarefied16S.merged$Primer <- as.factor("16S")
 
 
 ################################################################################
 ### 18S
-rarefied18S <- read.table("18S/wine.filter.cat.unique.good.filter.unique.precluster.pick.pick.opti_mcc.groups.rarefaction",
+rarefied18S <- read.table("euk/filtered/wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.groups.rarefaction",
                           sep = "\t", header = TRUE, check.names = FALSE)
 
 numsampled <- rarefied18S$numsampled
@@ -88,7 +82,7 @@ rarefied18S.hci <- cbind(numsampled,
 
 rarefied18S.sample.m <- melt(rarefied18S.sample, id = "numsampled",
                              variable.name = "Sample",
-                             value.name = "OTUs")
+                             value.name = "OTU")
 rarefied18S.lci.m <- melt(rarefied18S.lci, id = "numsampled",
                           variable.name = "Sample",
                           value.name = "lci")
@@ -112,44 +106,47 @@ rm(rarefied18S, rarefied18S.hci, rarefied18S.hci.m, rarefied18S.lci,
    rarefied18S.lci.m, rarefied18S.sample, rarefied18S.sample.m, numsampled)
 
 
-rarefied18S.merged$Site <- as.factor(gsub(".{5}$", "",
-                                          rarefied18S.merged$Sample))
-# rarefied18S.merged$Site <- ordered(rarefied18S.merged$Site,
-#                                    levels = c("CB", "LT", "LE", "LV", "LM",
-#                                               "MC", "NC"))
-rarefied18S.merged$Succession <- as.factor(gsub("^.{6}", "",
-                                                rarefied18S.merged$Sample))
-
 rarefied18S.merged$Primer <- as.factor("18S")
+
 
 ################################################################################
 ## Merge 16S and 18S
 
 rarefied <- rbind(rarefied16S.merged, rarefied18S.merged)
+rm(rarefied16S.merged, rarefied18S.merged)
 head(rarefied)
 
-levels(rarefied$Succession) <- c("Early succession", "Late succession", "Moss",
-                                 "Negative control Pilot", "Negative control SMP",
-                                 "Mock Prokaryote Pilot", "Mock Prokaryote SMP",
-                                 "reseq Pilot",
-                                 "Mock Eukaryote Pilot", "Mock Eukaryote SMP")
+
+rarefied$Vineyard <- gsub("^[[:digit:]]", "", rarefied$Sample)
+
+metaData <- read.table("~/Documents/Seafile/PromESSinG_Bioinformatics/MicrobiomeWorkshop/DNA_sampleID.csv",
+                       sep = "\t", header = TRUE)
+
+rarefied <- merge(rarefied, metaData[, c(5, 9)],
+                  by.x = "Sample", by.y = "row_ID")
+
+rarefied$Treatment <- ordered(rarefied$Treatment,
+                              levels = c("Bare Ground", "Alternating Cover",
+                                         "Complete Cover"))
+
 
 ################################################################################
 ## Plot rarefaction curves
 
-ggplot(data = rarefied16S.merged) +
-  geom_line(aes(x = numsampled, y = lci, group = Sample), color = "gray85",
+ggplot(data = rarefied) +
+  geom_line(aes(x = numsampled, y = lci, group = Sample), color = "gray",
             size = 0.3) +
-  geom_line(aes(x = numsampled, y = hci, group = Sample), color = "gray85",
+  geom_line(aes(x = numsampled, y = hci, group = Sample), color = "gray",
             size = 0.3) +
-  geom_line(aes(x = numsampled, y = OTUs, color = Succession, group = Sample),
+  geom_line(aes(x = numsampled, y = OTU, color = Primer, group = Sample),
             size = 0.5) +
-  facet_grid(Primer ~ Site) +
-  theme(legend.position = "top", legend.direction = "horizontal",
-        legend.title = element_blank(),
+  facet_grid(Primer ~ Treatment) +
+  theme(legend.position = "none",
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab("Reads") +
   ylab("OTUs")
+ggsave("mothur_RarefactionCurves.pdf", width = 11.69, height = 8.27)
+
 
 ################################################################################
 ################################################################################
