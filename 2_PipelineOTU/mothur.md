@@ -1,6 +1,6 @@
 # mothur pipeline
 ## 16S & 18S
-The pipeline is basically the same for 16S and 18S. Exceptions are the SILVA reference database as it was customized to each primer pair and some consequential steps - such cases are highlighted. 
+The pipeline is basically the same for 16S and 18S. Exceptions are steps dealing with the SILVA reference database that was customized to each primer pair and some consequential steps - such cases are highlighted. 
 
 Open `mothur` directly in the shell (command line/terminal). Calling `mothur` opens the program and the commands below can be run from there.
 
@@ -9,7 +9,7 @@ Set working directory and specify number of available processors.
 set.dir(tempdefault=.)
 set.current(processors=6)
 ```
-*Note*: run `nproc` to see number of available processors.
+*Tip*: run `nproc` in the shell to see number of available processors.
 
 ## Merge reads to contigs
 Create a metafile listing all the fastq in the directory with a given prefix (`wine.files`). Then, merge the forward and reverse reads to contigs with the [Needleman-Wunsch algorithm](https://en.wikipedia.org/wiki/Needleman%E2%80%93Wunsch_algorithm).
@@ -23,7 +23,7 @@ get.current()
 ```
 
 ## Quality trimming
-Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from previous `summary.seqs()`.
+Remove all contigs that are either too long or too short and exceed a certain amount of homopolymers. Values taken from output of previous `summary.seqs()`.
 
 The expected amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 300 to 350 bp, the [EMP 18S primers](http://www.earthmicrobiome.org/protocols-and-standards/18s/) about 260 +/- 50 bp.
 ```bash
@@ -247,6 +247,7 @@ count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 ```
 
 ## Count &alpha;-diversity
+* We could skip this too...
 Count OTUs sample-wise with [AWK](https://en.wikipedia.org/wiki/AWK) (awk -v: var=val, -e: use program-text, OFS: output field separator, NF: input field number, NR: total number of input records so far).
 ```bash
 system(awk -v OFS='\t' -e '{notus=0; for (i=4; i<=NF; i++) { if ($i > 0) notus++; }; if (NR > 1) print $2 OFS notus; }' wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared > wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.sample.summary)
