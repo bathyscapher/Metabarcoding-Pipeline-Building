@@ -152,6 +152,7 @@ get.current()
 ```
 
 ## Extract OTUs at different taxa level
+* We could skip this, much simpler in phyloseq/R
 First, remove the multiple in-line headers from the file with [AWK](https://en.wikipedia.org/wiki/AWK). Then, create .shared files for all six taxonomic levels (1 = domain, 2 = phylum, 3 = order, 4 = class?, 5 = family, 6 = genus).
 ```bash
 ### 16S
