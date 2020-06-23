@@ -115,13 +115,13 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = rF.cut[[reads]]),
 
 ### Filter and trim. Place filtered files in filtered/ subdirectory
 ## 16S
-rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
-rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
+# rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
+# rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
 
 
 ## 18S
-# rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
-# rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
+rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
+rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
 
 
 names(rF.cut.f) <- sample.names
