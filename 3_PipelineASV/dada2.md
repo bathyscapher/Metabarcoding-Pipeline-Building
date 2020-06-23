@@ -1,11 +1,11 @@
 # dada2 pipeline
 Clear workspace, set working directory and specify number of available processors.
 ```R
-rm(list = ls())
-setwd("...")
-
 library("dada2")
 library("DECIPHER")
+
+rm(list = ls())
+setwd("...")
 
 ncore <- 6
 ```
