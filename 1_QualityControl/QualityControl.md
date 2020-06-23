@@ -7,6 +7,7 @@ rename -n 's/_17_1\d{1}S//' *fastq.gz
 ```
 
 ## Filter & trim
-Filter  and trim the reads with [this dada2 script](QualityFiltering.R).
+Filter  and trim the reads with [this R script](QualityFiltering.R).
 
+![16S reads unfiltered vs. filtered](/Graphs/Preprocessing_QualityFiltering16S.png)
 
