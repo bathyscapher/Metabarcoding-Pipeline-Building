@@ -8,4 +8,4 @@ Generally following the [MiSeq SOP](https://mothur.org/wiki/miseq_sop/), the maj
 1. Distance matrix
 1. OTU clustering and classification
 
-Useful links are the [mothur wiki](https://mothur.org/wiki/), in particular the [command page](https://mothur.org/wiki/tags/#commands) and the [manual](https://mothur.org/wiki/mothur_manual/). Download the [most recent version here](https://github.com/mothur/mothur/releases).
+Useful links are the [mothur wiki](https://mothur.org/wiki/), in particular the [command page](https://mothur.org/wiki/tags/#commands) and the [manual](https://mothur.org/wiki/mothur_manual/). Download the [most recent mothur version here](https://github.com/mothur/mothur/releases).
