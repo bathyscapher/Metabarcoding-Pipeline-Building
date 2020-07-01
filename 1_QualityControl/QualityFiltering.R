@@ -16,7 +16,8 @@ library("gridExtra")
 rm(list = ls())
 
 
-setwd("/scratch/PromESSinG/euk/")
+setwd("/scratch/PromESSinG/prok/")
+# setwd("/scratch/PromESSinG/euk/")
 
 
 ################################################################################
@@ -43,11 +44,11 @@ filterAndTrim(rF, rF.fN, rR, rR.fN, maxN = 0, multithread = TRUE)
 
 
 ## Forward and reverse primer (choose either 16S or 18S)
-# FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
-# REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
+FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
+REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
 
-FWD <- "GTACACACCGCCCGTC" # Euk_1391f
-REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
+# FWD <- "GTACACACCGCCCGTC" # Euk_1391f
+# REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
 
 
 ## Compile all orientations of the primers
@@ -115,13 +116,13 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = rF.cut[[reads]]),
 
 ### Filter and trim. Place filtered files in filtered/ subdirectory
 ## 16S
-# rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
-# rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
+rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
+rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
 
 
 ## 18S
-rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
-rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
+# rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
+# rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
 
 
 names(rF.cut.f) <- sample.names
@@ -133,6 +134,9 @@ FASTQ.f <- filterAndTrim(rF.fN, rF.cut.f, rR.fN, rR.cut.f,
                      maxN = 0, maxEE = c(2, 2), minLen = 100,
                      truncQ = 2, rm.phix = TRUE,
                      compress = TRUE, multithread = ncore, verbose = TRUE)
+
+
+saveRDS(FASTQ.f, "FASTQ.f.rds")
 
 
 ### Plot quality profiles exemplarily

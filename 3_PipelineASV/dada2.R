@@ -10,12 +10,15 @@
 
 library("dada2")
 library("DECIPHER")
+library("reshape2")
+library("ggplot2")
 
 
 rm(list = ls())
 
 
-setwd("/scratch/PromESSinG/euk/filtered/")
+setwd("/scratch/PromESSinG/prok/filtered/")
+# setwd("/scratch/PromESSinG/euk/filtered/")
 
 
 ################################################################################
@@ -44,8 +47,8 @@ plotErrors(errR, nominalQ = TRUE)
 
 
 ### Core sample inference algorithm
-dadaF <- dada(rF.f, err = errF, multithread = ncore)
-dadaR <- dada(rR.f, err = errR, multithread = ncore)
+dadaF <- dada(rF, err = errF, multithread = ncore)
+dadaR <- dada(rR, err = errR, multithread = ncore)
 
 
 saveRDS(dadaF, "dadaF.rds")
@@ -53,7 +56,7 @@ saveRDS(dadaR, "dadaR.rds")
 
 
 ### Merge paired reads
-contigs <- mergePairs(dadaF, rF.f, dadaR, rR.f, verbose = TRUE)
+contigs <- mergePairs(dadaF, rF, dadaR, rR, verbose = TRUE)
 head(contigs[[1]])
 
 saveRDS(contigs, "contigs.rds")
@@ -70,16 +73,28 @@ table(nchar(getSequences(asv.tab)))
 asv.tab.nochim <- removeBimeraDenovo(asv.tab, method = "consensus",
                                      multithread = ncore, verbose = TRUE)
 dim(asv.tab.nochim)
-
 sum(asv.tab.nochim) / sum(asv.tab)
+
+
+table(nchar(getSequences(asv.tab.nochim)))
+
 
 saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 
 
-### Assign taxonomy with IdTaxa and SILVA
+### Assign taxonomy with RDP classifier
+taxa <- assignTaxonomy(asv.tab.nochim,
+                       "~/Desktop/SMP_unsynced/silva/silva_nr_v138_train_set.fa.gz",
+                       multithread = TRUE, verbose = TRUE)
+
+
+saveRDS(taxa, "taxa.rds")
+
+
+### Assign taxonomy with IdTaxa
 dna <- DNAStringSet(getSequences(asv.tab.nochim))
 
-load("SILVA_SSU_r132_March2018.RData")
+load("~/Desktop/SMP_unsynced/silva/SILVA_SSU_r132_March2018.RData")
 
 
 ids <- IdTaxa(dna, trainingSet, strand = "top", processors = ncore,
@@ -95,61 +110,66 @@ taxa.id <- t(sapply(ids, function(x) {
   taxa
 }))
 
+
 colnames(taxa.id) <- ranks
 rownames(taxa.id) <- getSequences(asv.tab.nochim)
+
 
 saveRDS(taxa.id, "taxa.id.rds")
 
 
 ### Survey where the reads are 'lost' in the pipeline.
-
 getN <- function(x) {
   sum(getUniques(x))
 }
 
 
-setwd("...")
+setwd("/scratch/PromESSinG/")
+
 
 ## 16S
-FASTQ.f <- readRDS("16S/FASTQ.f.rds")
-dadaF <- readRDS("16S/filtered/dadaF.rds")
-dadaR <- readRDS("16S/filtered/dadaR.rds")
-contigs <- readRDS("16S/filtered/contigs.rds")
-asv.tab.nochim <- readRDS("16S/filtered/seq.tab.nochim.rds")
-taxa.id <- readRDS("16S/filtered/taxa.id.rds")
+FASTQ.f <- readRDS("prok/FASTQ.f.rds")
+dadaF <- readRDS("prok/filtered/dadaF.rds")
+dadaR <- readRDS("prok/filtered/dadaR.rds")
+contigs <- readRDS("prok/filtered/contigs.rds")
+asv.tab.nochim <- readRDS("prok/filtered/asv.tab.nochim.rds")
+# taxa <- readRDS("prok/filtered/taxa.rds")
+# taxa.id <- readRDS("prok/filtered/taxa.id.rds")
 
-track.16S <- cbind(FASTQ.f, sapply(dadaF, getN), sapply(dadaR, getN),
+track.prok <- cbind(FASTQ.f, sapply(dadaF, getN), sapply(dadaR, getN),
                    sapply(contigs, getN), rowSums(asv.tab.nochim))
 
-colnames(track.16S) <- c("Raw", "Filtered", "Denoised F", "Denoised R",
+colnames(track.prok) <- c("Raw", "Filtered", "Denoised F", "Denoised R",
                          "Contigs", "Without Chimeras")
-rownames(track.16S) <- sample.names
+rownames(track.prok) <- sample.names
 
-track.cS.16S <- as.data.frame(t(colSums(track.16S)))
-track.cS.16S$Primer <- "16S"
+track.cS.prok <- as.data.frame(t(colSums(track.prok)))
+track.cS.prok$Primer <- "16S"
 
 
 ## 18S
-FASTQ.f <- readRDS("18S/FASTQ.f.rds")
-dadaF <- readRDS("18S/filtered/dadaF.rds")
-dadaR <- readRDS("18S/filtered/dadaR.rds")
-contigs <- readRDS("18S/filtered/contigs.rds")
-asv.tab.nochim <- readRDS("18S/filtered/seq.tab.nochim.rds")
-taxa.id <- readRDS("18S/filtered/taxa.id.rds")
+FASTQ.f <- readRDS("euk/FASTQ.f.rds")
+dadaF <- readRDS("euk/filtered/dadaF.rds")
+dadaR <- readRDS("euk/filtered/dadaR.rds")
+contigs <- readRDS("euk/filtered/contigs.rds")
+asv.tab.nochim <- readRDS("euk/filtered/asv.tab.nochim.rds")
+# taxa <- readRDS("euk/filtered/taxa.rds")
+# taxa.id <- readRDS("euk/filtered/taxa.id.rds")
 
-track.18S <- cbind(FASTQ.f, sapply(dadaF, getN), sapply(dadaR, getN),
+
+track.euk <- cbind(FASTQ.f, sapply(dadaF, getN), sapply(dadaR, getN),
                    sapply(contigs, getN), rowSums(asv.tab.nochim))
 
-colnames(track.18S) <- c("Raw", "Filtered", "Denoised F", "Denoised R",
+colnames(track.euk) <- c("Raw", "Filtered", "Denoised F", "Denoised R",
                          "Contigs", "Without Chimeras")
-rownames(track.18S) <- sample.names
+rownames(track.euk) <- sample.names
 
-track.cS.18S <- as.data.frame(t(colSums(track.18S)))
-track.cS.18S$Primer <- "18S"
+track.cS.euk <- as.data.frame(t(colSums(track.euk)))
+track.cS.euk$Primer <- "18S"
 
 
 ## Combine
-track.cS <- rbind(track.cS.16S, track.cS.18S)
+track.cS <- rbind(track.cS.prok, track.cS.euk)
 track.cS.m <- melt(track.cS, variable.name = "dada2", value.name = "Reads")
 
 

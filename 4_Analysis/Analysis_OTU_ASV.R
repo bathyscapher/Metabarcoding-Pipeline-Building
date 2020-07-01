@@ -18,7 +18,7 @@ library("vegan")
 rm(list = ls())
 
 
-setwd("~/Documents/Metabarcoding-Pipeline-Building/")
+setwd("~/Metabarcoding-Pipeline-Building/")
 
 
 ################################################################################
@@ -97,10 +97,10 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
 ################################################################################
 ### Read taxa into phyloseq object
 ## Note: for now choose RDP for OTU, DECIPHER for ASV
-method <- "ASV"
-primer <- "18S"
+method <- "OTU"
+primer <- "16S"
 classifier <- "RDP"
-classifier <- "DECIPHER"
+# classifier <- "DECIPHER"
 
 
 wine <- readTaxa(method = method, primer = primer, classifier = classifier)
