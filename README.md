@@ -9,11 +9,12 @@ In this workshop the participants will be introduced to the workflow of microbio
 * Linux terminal
 * cutadapt
 * mothur
-* dada2 (R package)
-* DECIPHER (R package)
-* phyloseq (R package)
-* ggplot2 (R package)
-* reshape2 (R package)
+* R packages
+  * dada2
+  * DECIPHER
+  * phyloseq
+  * ggplot2
+  * reshape2
 
 ## To do
 * track total reads in dada2
