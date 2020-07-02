@@ -12,37 +12,39 @@
 ################################################################################
 
 
-rm(list = ls())
-
 library("ggplot2")
   theme_set(theme_bw(base_size = 12))
 library("reshape2")
 
 
-setwd("/scratch/PromESSinG/")
+rm(list = ls())
+
+
+setwd("/scratch/mpb/euk/filtered/")
+
 
 ################################################################################
-
 reads <- read.table("countReadsMothur.csv", sep = "\t", header = TRUE)
-reads <- reads[-1, ]
-reads <- droplevels(reads)
+reads <- reads[-1, ] # delete empty line
+reads$mothur <- as.factor(reads$mothur)
 
 
-levels(reads$mothur)[6] <- gsub("screen.seqs", "screen.seqs2", reads[4, 1])
+levels(reads$mothur)[7] <- gsub("screen.seqs", "screen.seqs2", reads[4, 1])
 reads$mothur <- gsub("\\(.+\\)", "", reads$mothur)
+
 
 reads$mothur <- ordered(reads$mothur, levels = c("make.contigs", "screen.seqs",
                                                  "align.seqs", "screen.seqs2",
                                                  "filter.seqs", "pre.cluster",
-                                                 "chimera.vsearch",  "system"))
+                                                 "chimera.vsearch", "system"))
 
 
 reads.m <- melt(reads, id.vars = "mothur", variable.name = "Counts",
                 value.name = "Reads")
 
+
 ################################################################################
 ## Plot
-
 ggplot(data = reads.m, aes(x = mothur, y = log(Reads), color = Counts)) +
   geom_line(aes(group = Counts), linetype = "dashed") +
   geom_point() +
@@ -50,6 +52,7 @@ ggplot(data = reads.m, aes(x = mothur, y = log(Reads), color = Counts)) +
         legend.title = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab("")
+
 
 ################################################################################
 ################################################################################
