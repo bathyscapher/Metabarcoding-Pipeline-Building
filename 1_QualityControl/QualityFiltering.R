@@ -16,8 +16,8 @@ library("gridExtra")
 rm(list = ls())
 
 
-setwd("/scratch/PromESSinG/prok/")
-# setwd("/scratch/PromESSinG/euk/")
+# setwd("/scratch/mpb/prok/")
+setwd("/scratch/mpb/euk/")
 
 
 ################################################################################
@@ -44,11 +44,11 @@ filterAndTrim(rF, rF.fN, rR, rR.fN, maxN = 0, multithread = TRUE)
 
 
 ## Forward and reverse primer (choose either 16S or 18S)
-FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
-REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
+# FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
+# REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
 
-# FWD <- "GTACACACCGCCCGTC" # Euk_1391f
-# REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
+FWD <- "GTACACACCGCCCGTC" # Euk_1391f
+REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
 
 
 ## Compile all orientations of the primers
@@ -116,13 +116,13 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = rF.cut[[reads]]),
 
 ### Filter and trim. Place filtered files in filtered/ subdirectory
 ## 16S
-rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
-rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
+# rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
+# rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
 
 
 ## 18S
-# rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
-# rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
+rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
+rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
 
 
 names(rF.cut.f) <- sample.names
