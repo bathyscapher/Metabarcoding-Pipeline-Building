@@ -2,7 +2,7 @@
 * BIOM format
 * Analysis approaches: OTU/ASV vs. phylogeny
 * Preprocessing & vizualisation (absolute, relative, rank abundance)
-* Rarefaction
+* Data normalisation
 * Webtools? (Calypso, ...)
 * Community composition ( &alpha;-, &beta;- & &gamma;-diversity, core microbiome, diversity indices ...)
 * Multivariate analysis (PCoA, PCA, CA)
