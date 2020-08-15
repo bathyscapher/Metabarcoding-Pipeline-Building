@@ -6,7 +6,7 @@
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
-
+# set working directory ####
 
 library("phyloseq")
 library("ggplot2")
@@ -95,7 +95,7 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
 
 
 ################################################################################
-### Read taxa into phyloseq object
+### Read taxa into phyloseq object ####
 ## Note: for now choose RDP for OTU, DECIPHER for ASV
 method <- "OTU"
 primer <- "16S"
@@ -111,7 +111,7 @@ colnames(tax_table(wine))
 
 
 ################################################################################
-### Add metadata
+### Add metadata ####
 #M load metadata
 metadata <- read.csv("metadata_corr.csv", sep = ",", header = TRUE, row.names = 1)
 head(metadata)
@@ -144,7 +144,7 @@ wine
 colSums(readsumsdf[, 1, drop = FALSE])
 
 ################################################################################
-### Remove spurious taxa
+### Remove spurious taxa ####
 if(primer == "16S")
 {
   wine.s <- subset_taxa(wine, !(Domain %in% c("unknown") |
@@ -168,7 +168,7 @@ if(primer == "18S")
 
 
 ################################################################################
-### Check for empty taxa and remove if any
+### Check for empty taxa and remove if any ####
 if(any(taxa_sums(wine) == 0))
 {
   sum(taxa_sums(wine) == 0)
@@ -189,14 +189,14 @@ wine.r = rarefy_even_depth(wine.s)
 wine.r #  
 
 ################################################################################
-### Percentual abundance
+### Percentual abundance ####
 wine.s <- transform_sample_counts(wine.r, function(otu) {otu / sum(otu)})
 plot(rowSums(otu_table(wine.s)), ylim = c(0, 1),
      xlab = "Samples", ylab = "Abundance [%]") # 100 % in all samples
 
 
 ################################################################################
-### Abundance filtering
+### Abundance filtering ####
 wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.0001}, 
                       prune = TRUE)
 points(rowSums(otu_table(wine.a)), col = "red")
@@ -212,7 +212,7 @@ wine.s
 wine.a
 otu_table(wine.a)[1:5, 1:5]
 ################################################################################
-### The effect of pruning and filtering
+### The effect of pruning and filtering ####
 nr.taxa <- data.frame(NrTaxa = c(dim(tax_table(wine))[1],
                                  dim(tax_table(wine.s))[1],
                                  dim(tax_table(wine.a))[1]),
@@ -223,24 +223,103 @@ nr.taxa$Dataset <- ordered(nr.taxa$Dataset, levels = c("Raw",
                                                        "Abundance filtering"))
 nr.taxa
 
+## To do: change colors
+ggplot(nr.taxa, aes(x = Dataset, y = NrTaxa, color = Dataset)) +
+  geom_point() +
+  theme(legend.position = "none") +
+  xlab(expression(paste(alpha, "-Diversity"))) +
+  ylab("")
+
+################################################################################
+### Plot taxa ####
+plot_bar(wine.a, x = "Phylum", fill = "Phylum") +
+  facet_grid(Domain ~ ., scales = "free_y") +
+  geom_bar(aes(color = Phylum, fill = Phylum), stat = "identity",
+           position = "stack") +
+  theme(legend.position = "top") +
+  xlab("") +
+  ylab("Abundance [%]") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  coord_flip()
+
+
 #M
+
+#If you want to save data tables separately 
+# Write rawdata tables
+wine.a
+
+write.table((otu_table(wine.a)), "wine.a_OTU.csv", col.names=NA,  row.names = TRUE, sep=",") 
+write.table((tax_table(wine.a)), "wine.a_TAX.csv", col.names=NA,  row.names = TRUE, sep=",") 
+write.table((sample_data(wine.a)), "wine.a_meta.csv", col.names=NA,  row.names = TRUE, sep=",") 
+
 # Alpha diversity with untransformed data
 #look at alpha diversity indices
 plot_richness(wine.r, measures=c("Observed", "Shannon", "Chao1")) # raw data
 
-#Extract diversity indices as number for firther analysis
+#Extract diversity indices as numbers and save as data frame
 wine_alpha <- estimate_richness(wine.r, split = TRUE, measure = c("Observed","Shannon", "Chao1", "Simpson"))
 wine_alpha <- as.data.frame(wine_alpha)
 
 head(wine_alpha)
-# Combine our data frames for linear regression
+
+# Combine metadata with indices data frames for linear regression
 reg.df <- cbind(metadata, wine_alpha)
 
 head(reg.df)
 
-# Community composition 
+# Linear regression ####
+library("lme4")
+
+#Look at my data
+Obs <- ggplot(reg.df, aes(x=vineyard, y=Observed, color=treatment)) + 
+  geom_point() + 
+  ggtitle("Observed")
+
+Obs
+
+# General linear models
+# Treatment
+m0 <- lmer(Observed ~ 1 + (1|vineyard), data = reg.df, REML = FALSE, na.action = "na.fail")
+
+m1 <- lmer(Observed ~ treatment + (1|vineyard) , data=reg.df, REML = FALSE, na.action = "na.fail")
+summary(m1)
+
+m2 <- lmer(Observed ~ treatment + scale(som) + scale(Cu) + scale(plat_spec) + (1|vineyard) , data=reg.df, REML = FALSE, na.action = "na.fail")
+summary(m2)
+
+library("car")
+AIC(m0, m1, m2)
+anova(m0, m1, m2) 
+
+# m2 fits best -> treatment does not expain "Observed" OTU richness. But copper does.
+m3 <- lmer(Observed ~ scale(Cu) + (1|vineyard) , data=reg.df, REML = FALSE, na.action = "na.fail")
+summary(m3)
+anova(m2, m3)
+
+# check modelfit
+res1<-resid(m3)
+qqnorm(res1)
+qqline(res1)
+
+# Plot model predictions from m3 Observed ~ Cu
+
+fixef(m3) #look at the fixed effects in m3
+
+obs <- ggplot(reg.df, aes(x=scale(Cu), y=Observed, color=treatment)) +
+  ggtitle("Observed") + 
+  geom_point(shape = 16, size=2) +
+  geom_abline(aes(intercept=`(Intercept)`, slope=-67.21558), as.data.frame(t(fixef(m3))))
+obs
+
+# You can build models for other diversity indices (Chao1, se.chao1, Shannon, Simpson)
+
+######################################################################
+# Community composition ####
+wine.a
 # with relative abundance data
 otu_table(wine.a)[1:5, 1:5]
+
 # testing for homogenous variation of groups in order to exclude significant effect due to inhomogenous ditributions 
 #convert into distance matrix
 d = distance(wine.a, "bray")
@@ -259,7 +338,7 @@ beta <- with(sampledf, betadisper(d, treatment))
 plot(beta)
 boxplot(beta)
 
-#NMDS (unconstrained Ordination)
+#NMDS (unconstrained Ordination) ####
 
 # NMDS of Bray-Curtis distance
 p_nmds = ordinate(wine.a, "NMDS", "bray")
@@ -290,7 +369,7 @@ p = p + geom_point(size = 5) +
 p
 p + stat_ellipse(aes(group = treatment), type = "t", linetype = 2, size = 0.2)
 
-# Constrained ordination
+# Constrained ordination ####
 # RDA
 p_rda = ordinate(wine.a.out, "RDA", "bray")
 
@@ -299,29 +378,12 @@ summary(ordcap)
 plot_ordination(wine.a, ordcap, "samples", color="treatment")
 
 
-## To do: change colors
-ggplot(nr.taxa, aes(x = Dataset, y = NrTaxa, color = Dataset)) +
-  geom_point() +
-  theme(legend.position = "none") +
-  xlab(expression(paste(alpha, "-Diversity"))) +
-  ylab("")
+# TO DO #### RDA with environmental variables (Cu, som, plant diversity)
+
 
 
 ################################################################################
-### Plot taxa
-plot_bar(wine.a, x = "Phylum", fill = "Phylum") +
-  facet_grid(Domain ~ ., scales = "free_y") +
-  geom_bar(aes(color = Phylum, fill = Phylum), stat = "identity",
-           position = "stack") +
-  theme(legend.position = "top") +
-  xlab("") +
-  ylab("Abundance [%]") +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
-  coord_flip()
-
-
-################################################################################
-### Shannon entropy
+### Shannon entropy ####
 ## To do: add useful metadata
 plot_richness(wine.a, x = "Treatment", measures = c("Shannon"),
               color = "Site") +
@@ -334,7 +396,7 @@ plot_richness(wine.a, x = "Treatment", measures = c("Shannon"),
 
 
 ################################################################################
-### Ordination
+### Ordination ####
 ## First, log-transform
 wine.log <- transform_sample_counts(wine.a, function(otu) {log1p(otu)})
 
