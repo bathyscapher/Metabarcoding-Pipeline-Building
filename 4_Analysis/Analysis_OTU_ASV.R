@@ -1,7 +1,7 @@
 ################################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
-### mothur pipeline OTU: rarefaction curves
+### Analysis of microbiome data
 ### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
 ### korn@cumulonimbus.at
 ################################################################################
@@ -137,7 +137,6 @@ wine <- merge_phyloseq(wine, MetaData)
 nsamples(wine)
 ntaxa(wine)
 sample_names(wine)[1:66] # why the subset if it includes the full dataset?
-
 sample_variables(wine) # metadata variables
 sample_data(wine)
 otu_table(wine)[1:5, 1:5]
@@ -147,9 +146,11 @@ tax_table(wine)[1:5, 1:6]
 ## Which taxa do we have in our data?
 get_taxa_unique(wine, taxonomic.rank = rank_names(wine)[2], errorIfNULL = TRUE)
 
+
 ## Look at our data
 readsumsdf <- data.frame(nreads = sort(taxa_sums(wine), TRUE),
                          sorted = 1:ntaxa(wine), type = "OTUs")
+
 
 ## Plot our raw reads per OTU
 p <- ggplot(readsumsdf, aes(x = sorted, y = nreads)) +
@@ -184,7 +185,7 @@ if(primer == "18S")
                                   Class %in% c("Insecta", "Ellipura",
                                                "Embryophyta", "Arachnida",
                                                "Heterophyidae",
-                                               # "Ichthyophonae",
+                                               "Ichthyophonae",
                                                "Arthropoda_unclassified",
                                                "unclassified_Hexapoda")))
 }
@@ -198,10 +199,12 @@ if(any(taxa_sums(wine) == 0))
   wine <- prune_taxa(taxa_sums(wine) > 0, wine)
 }
 
+
 #M
 ## Check sample_sums (to check if we should remove a sample with a very low
 ## number of reads before rarefying)
 sums <- sample_sums(wine)
+
 
 barplot(sums, beside = TRUE, col = c("grey"),
         cex.axis = 1, cex.names = 0.6, las = 2)
@@ -234,6 +237,7 @@ if(any(taxa_sums(wine) == 0))
   sum(taxa_sums(wine) == 0)
   wine <- prune_taxa(taxa_sums(wine) > 0, wine)
 }
+
 
 wine.s
 wine.a
@@ -289,7 +293,23 @@ write.table((sample_data(wine.a)), "wine.a_meta.csv", col.names = NA,
             row.names = TRUE, sep = ",")
 
 
+## OTU table with taxonomic annotation
+tax <- as.data.frame(wine.a@tax_table@.Data)
+otu <- as.data.frame(t(otu_table(wine.a)))
+
+tax.otu <- merge(tax, otu, by = 0, all = TRUE) # by = 0 = by rownames
+rownames(tax.otu) <- tax.otu$Row.names
+tax.otu$Row.names <- NULL
+
+
+rm(tax, otu)
+
+
 ### Alpha diversity with untransformed data
+## Colorblind scale
+cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
+
+
 ## Look at alpha diversity indices
 # raw data. r: that's the rarefied data, right?
 plot_richness(wine.r, measures = c("Observed", "Shannon", "Chao1")) +
@@ -326,8 +346,6 @@ head(reg.df)
 ### Linear regression ####
 library("lme4")
 
-## Colorblind scale
-cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
 
 
 ## Look at my data
@@ -389,7 +407,7 @@ qqline(res1)
 
 
 ## Plot model predictions from m3 Observed ~ Cu
-fixef(m3) #look at the fixed effects in m3
+fixef(m3) # look at the fixed effects in m3
 
 
 obs <- ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = treatment)) +
@@ -413,6 +431,7 @@ wine.a
 ## with relative abundance data
 otu_table(wine.a)[1:5, 1:5]
 
+
 ## Testing for homogenous variation of groups in order to exclude significant
 ## effect due to inhomogenous ditributions
 ## Convert into distance matrix
@@ -430,7 +449,7 @@ permutest(beta) # not significant: variations are homogenous
 anova(beta)
 
 
-## visualize variances
+## Visualize variances
 beta <- with(sampledf, betadisper(d, treatment))
 plot(beta)
 boxplot(beta, xlab = "Treatment")
@@ -442,7 +461,7 @@ boxplot(beta, xlab = "Treatment")
 p_nmds <- ordinate(wine.a, "NMDS", "bray", autotransform = TRUE)
 p_nmds
 
-stressplot(p_nmds)
+stressplot(p_nmds) # GOF
 
 
 p <- plot_ordination(wine.a, p_nmds, color = "treatment", shape = "treatment") +
@@ -497,9 +516,10 @@ plot_ordination(wine.a, ordcap, "samples", color = "treatment") +
 # TO DO #### RDA with environmental variables (Cu, som, plant diversity)
 
 
-### MDS = PCoA ####
+### MDS = PCoA #### sollen wir das weglassen?
 ## First, log-transform
 wine.log <- transform_sample_counts(wine.a, function(otu) {log1p(otu)})
+
 
 wine.nmds <- ordinate(wine.log, method = "PCoA", distance = "bray",
                       autotransform = FALSE)
