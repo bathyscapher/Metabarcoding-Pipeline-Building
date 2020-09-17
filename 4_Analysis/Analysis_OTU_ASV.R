@@ -1,4 +1,4 @@
-################################################################################
+###############################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
 ### Analysis of microbiome data
@@ -39,8 +39,8 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
   ifelse(primer == "16S",
          goto <- "prok",
          goto <- "euk")
-
-
+  
+  
   ### Read OTU
   if(method == "OTU" && classifier == "RDP")
   {
@@ -55,42 +55,42 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
                                 "wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.0.03.cons.taxonomy",
                                 sep = "/"),
                           parseFunction = parse_taxonomy_default)
-
+    
     ## Rename taxonomic ranks
     colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
                                    "Family", "Genus")
   }
-
-
+  
+  
   ### Read ASV
   if (method == "ASV")
   {
     seqtab.nochim <- readRDS(paste("ASV", goto, "seq.tab.nochim.rds",
                                    sep = "/"))
-
+    
     ifelse(classifier == "RDP",
            taxa <- readRDS(paste("ASV", goto, "taxa.rds", sep = "/")),
            taxa <- readRDS(paste("ASV", goto, "taxa.id.rds", sep = "/")))
-
+    
     wine <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows = FALSE),
                      tax_table(taxa))
-
+    
     dna <- Biostrings::DNAStringSet(taxa_names(wine))
     names(dna) <- taxa_names(wine)
     wine <- merge_phyloseq(wine, dna)
     taxa_names(wine) <- paste0("ASV", seq(ntaxa(wine)))
-
+    
     ### Rename taxonomic ranks
     # colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
     #                               "Family", "Genus")
     colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
                                    "Family", "Genus", "Species")
   }
-
+  
   ### Transpose (sometimes the OTU table is transposed... :-|)
   if (taxa_are_rows(wine))
   {otu_table(wine) <- t(otu_table(wine))}
-
+  
   return(wine)
 }
 
@@ -311,7 +311,7 @@ cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
 
 
 ## Look at alpha diversity indices
-# raw data. r: that's the rarefied data, right?
+# rarified data data
 plot_richness(wine.r, measures = c("Observed", "Shannon", "Chao1")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylab(expression(paste(alpha, "-diversity index"))) +
@@ -417,7 +417,7 @@ obs <- ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = treatment)) +
               as.data.frame(t(fixef(m3)))) +
   scale_color_manual(values = cols) +
   ylab(expression(alpha-diversity)) +
-  xlab("Copper [unit]") # do we have a unit for copper?
+  xlab("Copper (scaled)") # r: do we have a unit for copper? M:the variable is scaled so guess assigning a unit does not make sense
 obs
 
 
@@ -457,8 +457,7 @@ boxplot(beta, xlab = "Treatment")
 
 ### NMDS (unconstrained Ordination) ####
 ## NMDS of Bray-Curtis distance
-# r: maybe better set autotransform to FALSE and select a transformation?
-p_nmds <- ordinate(wine.a, "NMDS", "bray", autotransform = TRUE)
+p_nmds <- ordinate(wine.a, "NMDS", "bray", autotransform = FALSE)
 p_nmds
 
 stressplot(p_nmds) # GOF
@@ -515,26 +514,3 @@ plot_ordination(wine.a, ordcap, "samples", color = "treatment") +
 
 # TO DO #### RDA with environmental variables (Cu, som, plant diversity)
 
-
-### MDS = PCoA #### sollen wir das weglassen?
-## First, log-transform
-wine.log <- transform_sample_counts(wine.a, function(otu) {log1p(otu)})
-
-
-wine.nmds <- ordinate(wine.log, method = "PCoA", distance = "bray",
-                      autotransform = FALSE)
-
-barplot(wine.nmds$values$Relative_eig)
-biplot(wine.nmds, data.frame(otu_table(wine.a)))
-
-
-plot_ordination(wine.a, wine.nmds, color = "treatment", title = NULL) +
-  stat_ellipse(aes(group = treatment), type = "t", linetype = 2, size = 0.2) +
-  geom_point(size = 3) +
-  scale_color_manual(values = cols) +
-  coord_fixed(ratio = 1) +
-  theme(legend.position = "top", legend.direction = "horizontal")
-
-
-################################################################################
-################################################################################
