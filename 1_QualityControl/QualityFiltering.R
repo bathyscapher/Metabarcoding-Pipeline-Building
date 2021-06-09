@@ -22,8 +22,8 @@ primer <- "16S"
 
 
 if (primer == "16S") {
-  setwd("prok/")
-  } else {setwd("euk/")}
+  setwd("/home/rstudio/prok/")
+  } else {setwd("/home/rstudio/euk/")}
 # getwd()
 
 
