@@ -2,7 +2,7 @@
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
 ### Quality filtering with dada2
-### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
@@ -16,12 +16,21 @@ library("gridExtra")
 rm(list = ls())
 
 
-# setwd("/scratch/mpb/prok/")
-setwd("/scratch/mpb/euk/")
+## Choose pro- or eukaryotes
+primer <- "16S"
+# primer <- "18S"
+
+
+if (primer == "16S") {
+  setwd("prok/")
+  } else {setwd("euk/")}
+# getwd()
 
 
 ################################################################################
-ncore <- 9 # number of available processors
+## Set number of available processors (run "nproc" in bash reveals number of 
+## available processors)
+ncore <- 6 
 
 
 list.files(pattern = "fastq.gz")
@@ -31,7 +40,7 @@ rR <- sort(list.files(pattern = "_R2_sub.fastq.gz", full.names = TRUE))
 
 
 ## Extract sample names
-sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
+sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 3)
 
 
 ### Check for primers
@@ -43,12 +52,14 @@ rR.fN <- file.path("filtN", basename(rR))
 filterAndTrim(rF, rF.fN, rR, rR.fN, maxN = 0, multithread = TRUE)
 
 
-## Forward and reverse primer (choose either 16S or 18S)
-# FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
-# REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
-
-FWD <- "GTACACACCGCCCGTC" # Euk_1391f
-REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
+## Forward and reverse primer for either 16S or 18S
+if (primer == "16S") {
+  FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
+  REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
+  } else {
+  FWD <- "GTACACACCGCCCGTC" # Euk_1391f
+  REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
+  }
 
 
 ## Compile all orientations of the primers
@@ -63,15 +74,15 @@ FWD.orients <- allOrients(FWD)
 REV.orients <- allOrients(REV)
 
 
-## Count occurence of all primer orientations in the reads
+## Count occurrence of all primer orientations in the reads
 primerHits <- function(primer, fn) {
   nhits <- vcountPattern(primer, sread(readFastq(fn)), fixed = FALSE)
   return(sum(nhits > 0))
-}
+  }
 
 
-## Cut the primers
-cutadapt <- "/usr/bin/cutadapt"
+## Cut the primers (find path to cutadapt with "which cutadapt" in bash)
+cutadapt <- "/usr/local/bin/cutadapt"
 # system2(cutadapt, args = "--version")
 
 
@@ -114,16 +125,19 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = rF.cut[[reads]]),
       REV.ReverseReads = sapply(REV.orients, primerHits, fn = rR.cut[[reads]]))
 
 
-### Filter and trim. Place filtered files in filtered/ subdirectory
-## 16S
-# rF.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
-# rR.cut.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
-
-
-## 18S
-rF.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
-rR.cut.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
-
+### Filter and trim. Place filtered files in filtered/ subdirectory for 16S and 
+### 18S
+if (primer == "16S") {
+  rF.cut.f <- file.path("filtered", paste0(sample.names, 
+                                           "_16S_R1_filt.fastq.gz"))
+  rR.cut.f <- file.path("filtered", paste0(sample.names, 
+                                           "_16S_R2_filt.fastq.gz"))
+  } else {
+  rF.cut.f <- file.path("filtered", paste0(sample.names, 
+                                           "_18S_R1_filt.fastq.gz"))
+  rR.cut.f <- file.path("filtered", paste0(sample.names,
+                                           "_18S_R2_filt.fastq.gz"))
+  }
 
 names(rF.cut.f) <- sample.names
 names(rR.cut.f) <- sample.names
