@@ -2,7 +2,7 @@
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
 ### Quality filtering with dada2
-### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
@@ -15,8 +15,18 @@ library("DECIPHER")
 rm(list = ls())
 
 
-# setwd("/scratch/mpb/prok/filtered/")
-setwd("/scratch/mpb/euk/filtered/")
+## Choose pro- or eukaryotes
+primer <- "16S"
+# primer <- "18S"
+
+
+if (primer == "16S") {
+  setwd("/home/rstudio/prok/filtered/")
+  } else {
+    setwd("/home/rstudio/euk/filtered")
+    }
+
+getwd()
 
 
 ################################################################################
@@ -37,16 +47,16 @@ names(rR) <- sample.names
 
 
 ### Estimate and plot the error rates
-errF <- learnErrors(rF, multithread = ncore)
-errR <- learnErrors(rR, multithread = ncore)
+errF <- learnErrors(rF, multithread = ncore, verbose = TRUE)
+errR <- learnErrors(rR, multithread = ncore, verbose = TRUE)
 
 plotErrors(errF, nominalQ = TRUE)
 plotErrors(errR, nominalQ = TRUE)
 
 
 ### Core sample inference algorithm
-dadaF <- dada(rF, err = errF, multithread = ncore)
-dadaR <- dada(rR, err = errR, multithread = ncore)
+dadaF <- dada(rF, err = errF, multithread = ncore, verbose = TRUE)
+dadaR <- dada(rR, err = errR, multithread = ncore, verbose = TRUE)
 
 
 saveRDS(dadaF, "dadaF.rds")
@@ -82,7 +92,7 @@ saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 
 ### Assign taxonomy with RDP classifier
 taxa <- assignTaxonomy(asv.tab.nochim,
-                       "~/Desktop/SMP_unsynced/silva/silva_nr_v138_train_set.fa.gz",
+                       "/home/rstudio/silva_nr99_v138.1_train_set.fa.gz",
                        multithread = TRUE, verbose = TRUE)
 
 
@@ -92,7 +102,7 @@ saveRDS(taxa, "taxa.rds")
 ### Assign taxonomy with IdTaxa
 dna <- DNAStringSet(getSequences(asv.tab.nochim))
 
-load("~/Desktop/SMP_unsynced/silva/SILVA_SSU_r132_March2018.RData")
+load("/home/rstudio/SILVA_SSU_r138_2019.RData")
 
 
 ids <- IdTaxa(dna, trainingSet, strand = "top", processors = ncore,

@@ -7,6 +7,4 @@ Generally following the [dada2 tutorial](https://benjjneb.github.io/dada2/tutori
 1. Construct ASV table
 1. Remove chimeras
 1. Track reads
-1. Assign taxonomy (IdTaxa)
-
-
+1. Assign taxonomy (RDP classifier and IdTaxa)
