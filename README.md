@@ -9,7 +9,7 @@ In this workshop, the participants will be introduced to the workflow of microbi
 * Linux terminal
 * cutadapt
 * mothur
-* R packages
+* R and Bioconductor packages
   * ShortRead
   * gridExtra
   * dada2
@@ -17,6 +17,8 @@ In this workshop, the participants will be introduced to the workflow of microbi
   * phyloseq
   * ggplot2
   * reshape2
+  * vegan
+  * lme4
 
 ## To do
 * track total reads in dada2
