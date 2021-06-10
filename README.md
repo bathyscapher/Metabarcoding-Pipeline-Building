@@ -1,5 +1,5 @@
 # Metabarcoding Pipeline Building
-## [CUSO](https://www.cuso.ch/) [Microbiome analysis workshop 2020](https://biologie.cuso.ch/index.php?id=1128&L=0&tx_displaycontroller[showUid]=5371)
+## [CUSO](https://www.cuso.ch/) [Microbiome analysis workshop 2021](https://biologie.cuso.ch/index.php?id=1128&L=0&tx_displaycontroller[showUid]=5371), University of Fribourg
 
 Metabarcoding is a rapidly evolving technique that identifies DNA from a set of often unknown organisms and reveals microbial communities in unprecedented taxonomical resolution by using universal PCR primers and high-throughput sequencing. It increasingly gains importance in almost all fields of biological and medical sciences. Its wide application range includes biodiversity assessment and monitoring, diet analysis, reconstruction of paleocommunities and more. The processing of metabarcoding data requires a broad range of skills at the interface of molecular biology, bioinformatics, biostatistics and biology/ecology.
 
