@@ -23,28 +23,26 @@ In ARB,
 1. Click the `Mark Listed Unmark Rest` button.
 1. Close the `Search and Query` box.
 1. Click on `File > export > export to external format`. Set the `Export` option to `marked`, `Filter` to `none` and `Compress` to `no`. In the field for `Choose an output file name` enter your path and name the output file (e.g. `silva.full_v138.1.fasta`).
-1. Create a custom formatting file that includes the sequences accession number and it's taxonomy across the top line: create `fasta_mothur.eft` in `/usr/lib/arb/lib/export` with the following content (depending on your OS, the path might deviate. On Windows it might be something like `$ARBHOME/lib/export/`):
-  ```
-  SUFFIX          fasta
-  BEGIN
-  >*(acc).*(name)\t*(align_ident_slv)\t*(tax_slv);
-  *(|export_sequence)
-  ```
+1. Create a custom formatting file that includes the sequences accession number and it's taxonomy across the top line: create `fasta_mothur.eft` in `/usr/lib/arb/lib/export` with the following content (depending on your OS, the path might deviate, on Windows it might be something like `$ARBHOME/lib/export/`):
+    ```
+    SUFFIX          fasta
+    BEGIN
+    >*(acc).*(name)\t*(align_ident_slv)\t*(tax_slv);
+    *(|export_sequence)
+    ```
 1. In `Select a format` select `fasta_mothur.eft`.
 1. Press `Go`.
 1. Quit ARB.
 
 
-
-
 ## 16S
-The respective primer sequences were taken and the *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the Earth Microbiome Project 16S primers would look like:
+Herein, the final output is `silva.v138.1_16S-V4.full` to classify the sequences.
+
+The *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region by the respective primers (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the Earth Microbiome Project 16S primers would look like in an `oligos` file as follows:
 ```
 forward GTGYCAGCMGCCGCGGTAA
 reverse ATTAGANACCCNNGTAGTCC
 ```
-
-Final output is `silva.v138.1_16S-V4.full` to classify the sequences.
 
 First, crop the *E. coli* fasta with the 16S-EMP primers, align it to [`silva.seed_v138.align`](https://mothur.org/wiki/silva_reference_files/) and extract relevant columns.
 Then, convert the resulting fasta into an `accnos` file, get the unique sequences from the `align` file and generate a `taxonomy` file.
