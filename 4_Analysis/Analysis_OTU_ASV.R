@@ -6,7 +6,7 @@
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
-# set working directory ####
+
 
 library("phyloseq")
 library("ggplot2")
@@ -18,8 +18,7 @@ library("vegan")
 rm(list = ls())
 
 
-setwd("C:/Users/Steima/Seafile/My Library/Doctoral school CUSO/Cuso organising a course/2020/Workshop-Analysis/")
-setwd("~/Metabarcoding-Pipeline-Building/")
+setwd("~") # set working directory to home
 
 
 ################################################################################
@@ -37,10 +36,10 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
                      classifier = c("RDP", "DECIPHER")){
   ### Specifiy path for pro- and eukaryotes
   ifelse(primer == "16S",
-         goto <- "prok",
-         goto <- "euk")
-  
-  
+         goto <- "prok/filtered",
+         goto <- "euk/filtered")
+
+
   ### Read OTU
   if(method == "OTU" && classifier == "RDP")
   {
@@ -55,50 +54,51 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
                                 "wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.0.03.cons.taxonomy",
                                 sep = "/"),
                           parseFunction = parse_taxonomy_default)
-    
+
     ## Rename taxonomic ranks
     colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
                                    "Family", "Genus")
   }
-  
-  
+
+
   ### Read ASV
   if (method == "ASV")
   {
-    seqtab.nochim <- readRDS(paste("ASV", goto, "seq.tab.nochim.rds",
+    seqtab.nochim <- readRDS(paste(goto, "asv.tab.nochim.rds",
                                    sep = "/"))
-    
+
     ifelse(classifier == "RDP",
-           taxa <- readRDS(paste("ASV", goto, "taxa.rds", sep = "/")),
-           taxa <- readRDS(paste("ASV", goto, "taxa.id.rds", sep = "/")))
-    
+           taxa <- readRDS(paste(goto, "taxa.rds", sep = "/")),
+           taxa <- readRDS(paste(goto, "taxa.id.rds", sep = "/")))
+
     wine <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows = FALSE),
                      tax_table(taxa))
-    
+
     dna <- Biostrings::DNAStringSet(taxa_names(wine))
     names(dna) <- taxa_names(wine)
     wine <- merge_phyloseq(wine, dna)
     taxa_names(wine) <- paste0("ASV", seq(ntaxa(wine)))
-    
+
     ### Rename taxonomic ranks
-    # colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
-    #                               "Family", "Genus")
-    colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
-                                   "Family", "Genus", "Species")
+    ifelse(classifier == "RDP",
+           colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
+                                          "Family", "Genus"),
+           colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
+                                          "Family", "Genus", "Species"))
   }
-  
+
   ### Transpose (sometimes the OTU table is transposed... :-|)
   if (taxa_are_rows(wine))
-  {otu_table(wine) <- t(otu_table(wine))}
-  
+    {otu_table(wine) <- t(otu_table(wine))}
+
   return(wine)
-}
+  }
 
 
 ################################################################################
 ### Read taxa into phyloseq object ####
 ## Note: for now choose RDP for OTU, DECIPHER for ASV
-method <- "OTU"
+method <- "ASV"
 primer <- "16S"
 classifier <- "RDP"
 # classifier <- "DECIPHER"
@@ -113,10 +113,15 @@ colnames(tax_table(wine))
 
 ################################################################################
 ### Add metadata ####
-## Load metadata
-metadata <- read.csv("Metadata_corr.csv", sep = ",", header = TRUE,
-                     row.names = 1)
+## Load metadata: adjust path if necessary, file is online on
+## https://github.com/bathyscapher/Metabarcoding-Pipeline-Building
+metadata <- read.csv("Metabarcoding-Pipeline-Building/Metadata_corr.csv",
+                     sep = ",", header = TRUE, row.names = 1)
 head(metadata)
+
+
+## Code vineyard names as factors
+metadata$vineyard <- as.factor(metadata$vineyard)
 
 
 ## Rename and sort factors
@@ -132,18 +137,17 @@ MetaData <- sample_data(metadata)
 wine <- merge_phyloseq(wine, MetaData)
 
 
-#M
 ## Exploring our data
 nsamples(wine)
 ntaxa(wine)
-sample_names(wine)[1:66] # why the subset if it includes the full dataset?
+sample_names(wine)[1:66]
 sample_variables(wine) # metadata variables
 sample_data(wine)
 otu_table(wine)[1:5, 1:5]
 tax_table(wine)[1:5, 1:6]
 
 
-## Which taxa do we have in our data?
+## Which taxa do we have in our data? Here on the phlya level:
 get_taxa_unique(wine, taxonomic.rank = rank_names(wine)[2], errorIfNULL = TRUE)
 
 
@@ -153,14 +157,12 @@ readsumsdf <- data.frame(nreads = sort(taxa_sums(wine), TRUE),
 
 
 ## Plot our raw reads per OTU
-p <- ggplot(readsumsdf, aes(x = sorted, y = nreads)) +
+ggplot(readsumsdf, aes(x = sorted, y = nreads)) +
   geom_bar(stat = "identity") +
   ggtitle("Total number of reads") +
   scale_y_log10() +
-  facet_wrap(~ type, 1, scales = "free") + # scales = "free" has no function here, remove?
   xlab("") +
   ylab(expression(paste(log[10], "(Number of reads)")))
-p
 
 
 wine
@@ -169,38 +171,33 @@ colSums(readsumsdf[, 1, drop = FALSE])
 
 ################################################################################
 ### Remove spurious taxa ####
-if(primer == "16S")
-{
-  wine.s <- subset_taxa(wine, !(Domain %in% c("unknown") |
-                                  Phylum %in% c("Eukaryota_unclassified", NA) |
-                                  Order %in% c("Chloroplast") |
-                                  Family %in% c("Mitochondria")))
-}
-
-if(primer == "18S")
-{
-  wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
-                                  Phylum %in% c("Eukaryota_unclassified",
-                                                "Mollusca", "Vertebrata", NA) |
-                                  Class %in% c("Insecta", "Ellipura",
-                                               "Embryophyta", "Arachnida",
-                                               "Heterophyidae",
-                                               "Ichthyophonae",
-                                               "Arthropoda_unclassified",
-                                               "unclassified_Hexapoda")))
-}
+ifelse(primer == "16S",
+       wine.s <- subset_taxa(wine, !(Domain %in% c("unknown") |
+                                       Phylum %in% c("Eukaryota_unclassified",
+                                                     NA) |
+                                       Order %in% c("Chloroplast") |
+                                       Family %in% c("Mitochondria"))),
+       wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
+                                       Phylum %in% c("Eukaryota_unclassified",
+                                                     "Mollusca", "Vertebrata",
+                                                     NA) |
+                                       Class %in% c("Insecta", "Ellipura",
+                                                    "Embryophyta", "Arachnida",
+                                                    "Heterophyidae",
+                                                    "Ichthyophonae",
+                                                    "Arthropoda_unclassified",
+                                                    "unclassified_Hexapoda"))))
 
 
 ################################################################################
 ### Check for empty taxa and remove if any ####
 if(any(taxa_sums(wine) == 0))
-{
+  {
   sum(taxa_sums(wine) == 0)
   wine <- prune_taxa(taxa_sums(wine) > 0, wine)
-}
+  }
 
 
-#M
 ## Check sample_sums (to check if we should remove a sample with a very low
 ## number of reads before rarefying)
 sums <- sample_sums(wine)
@@ -214,7 +211,7 @@ summary(sums) # looks good no sample should be removed
 ## Rarefy
 set.seed(100)
 wine.r <- rarefy_even_depth(wine.s)
-wine.r #
+wine.r
 wine
 
 
@@ -227,16 +224,16 @@ plot(rowSums(otu_table(wine.s)), ylim = c(0, 1),
 
 ################################################################################
 ### Abundance filtering ####
-wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.00001},
+wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.0001},
                       prune = TRUE)
 points(rowSums(otu_table(wine.a)), col = "red")
 
 
 if(any(taxa_sums(wine) == 0))
-{
+  {
   sum(taxa_sums(wine) == 0)
   wine <- prune_taxa(taxa_sums(wine) > 0, wine)
-}
+  }
 
 
 wine.s
@@ -268,21 +265,25 @@ ggplot(nr.taxa, aes(x = Dataset, y = NrTaxa)) +
 
 
 ################################################################################
+## Colorblind scale
+cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
+
+
 ### Plot taxa ####
-plot_bar(wine.a, x = "Phylum", fill = "Phylum") +
+plot_bar(wine.a, x = "Phylum", fill = "treatment") +
   facet_grid(Domain ~ ., scales = "free_y", space = "free") +
-  geom_bar(aes(color = Phylum, fill = Phylum), stat = "identity",
+  geom_bar(aes(color = treatment, fill = treatment), stat = "identity",
            position = "stack") +
   theme(legend.position = "top", legend.direction = "horizontal") +
   xlab("") +
   ylab("Abundance [%]") +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  scale_color_manual(values = cols) +
+  scale_fill_manual(values = cols) +
   coord_flip()
 
 
-#M
-#If you want to save data tables separately
-## Write rawdata tables
+## If you want to save data tables separately, write raw data tables
 wine.a
 
 write.table((otu_table(wine.a)), "wine.a_OTU.csv", col.names = NA,
@@ -293,7 +294,7 @@ write.table((sample_data(wine.a)), "wine.a_meta.csv", col.names = NA,
             row.names = TRUE, sep = ",")
 
 
-## OTU table with taxonomic annotation
+## Extract OTU table with taxonomic annotation
 tax <- as.data.frame(wine.a@tax_table@.Data)
 otu <- as.data.frame(t(otu_table(wine.a)))
 
@@ -306,19 +307,15 @@ rm(tax, otu)
 
 
 ### Alpha diversity with untransformed data
-## Colorblind scale
-cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
-
-
 ## Look at alpha diversity indices
-# rarified data data
+# rarified data
 plot_richness(wine.r, measures = c("Observed", "Shannon", "Chao1")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylab(expression(paste(alpha, "-diversity index"))) +
   xlab("Samples")
 
 
-# r: Or like this? (Chao1 would need a jitter if we keep it...)
+# r: Or like this?
 plot_richness(wine.r, x = "treatment",
               measures = c("Observed", "Shannon", "Chao1"),
               color = "treatment") +
@@ -347,21 +344,19 @@ head(reg.df)
 library("lme4")
 
 
-
-## Look at my data
-Obs <- ggplot(reg.df, aes(x = vineyard, y = Observed, color = treatment)) +
+## Look at our data
+ggplot(reg.df, aes(x = vineyard, y = Observed, color = treatment)) +
   geom_point(size = 3) +
   ggtitle("Observed") +
   scale_color_manual(values = cols) +
   ylab(expression(alpha-diversity)) +
   xlab("Vineyards")
-Obs
 
 
 ## Same summarized (caution: use height = 0 to jitter only horizontally!)
 ggplot(reg.df, aes(x = treatment, y = Observed, color = treatment)) +
   geom_boxplot(color = "black", outlier.shape = NA) + # omit outliers
-  geom_jitter(height = 0, size = 3) +
+  geom_jitter(height = 0, width = 0.3, size = 3) +
   ggtitle("Observed") +
   scale_color_manual(values = cols) +
   theme(legend.position = "none") +
@@ -392,15 +387,15 @@ AIC(m0, m1, m2)
 anova(m0, m1, m2)
 
 
-## m2 fits best -> treatment does not expain "Observed" OTU richness. But copper
-## does.
+## m2 fits best -> treatment does not explain "Observed" OTU richness. But
+## copper does.
 m3 <- lmer(Observed ~ scale(Cu) + (1|vineyard) , data = reg.df, REML = FALSE,
            na.action = "na.fail")
 summary(m3)
 anova(m2, m3)
 
 
-## Check modelfit
+## Check model fit
 res1 <- resid(m3)
 qqnorm(res1)
 qqline(res1)
@@ -410,7 +405,7 @@ qqline(res1)
 fixef(m3) # look at the fixed effects in m3
 
 
-obs <- ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = treatment)) +
+ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = treatment)) +
   ggtitle("Observed") +
   geom_point(shape = 16, size = 2) +
   geom_abline(aes(intercept = `(Intercept)`, slope = -67.21558),
@@ -418,10 +413,10 @@ obs <- ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = treatment)) +
   scale_color_manual(values = cols) +
   ylab(expression(alpha-diversity)) +
   xlab("Copper (scaled)") # r: do we have a unit for copper? M:the variable is scaled so guess assigning a unit does not make sense
-obs
 
 
-# You can build models for other diversity indices (Chao1, se.chao1, Shannon, Simpson)
+## Exercise: can you build models for other diversity indices (Chao1, se.chao1,
+## Shannon, Simpson)
 
 
 ################################################################################
@@ -432,8 +427,8 @@ wine.a
 otu_table(wine.a)[1:5, 1:5]
 
 
-## Testing for homogenous variation of groups in order to exclude significant
-## effect due to inhomogenous ditributions
+## Testing for homogeneous variation of groups in order to exclude significant
+## effects due to inhomogeneous distributions
 ## Convert into distance matrix
 d <- distance(wine.a, "bray")
 
@@ -442,7 +437,7 @@ d <- distance(wine.a, "bray")
 sampledf <- data.frame(sample_data(wine.a))
 
 beta <- betadisper(d, sampledf$treatment)
-permutest(beta) # not significant: variations are homogenous
+permutest(beta) # not significant: variations are homogeneous
 
 
 ## Perform test
@@ -452,27 +447,27 @@ anova(beta)
 ## Visualize variances
 beta <- with(sampledf, betadisper(d, treatment))
 plot(beta)
-boxplot(beta, xlab = "Treatment")
+boxplot(beta, xlab = "Treatment", col = cols)
 
 
 ### NMDS (unconstrained Ordination) ####
 ## NMDS of Bray-Curtis distance
-p_nmds <- ordinate(wine.a, "NMDS", "bray", autotransform = FALSE)
+p_nmds <- ordinate(wine.a, "NMDS", "bray", autotransform = FALSE,
+                  trymax = 50)
 p_nmds
 
 stressplot(p_nmds) # GOF
 
 
-p <- plot_ordination(wine.a, p_nmds, color = "treatment", shape = "treatment") +
+plot_ordination(wine.a, p_nmds, color = "treatment", shape = "treatment") +
   geom_point(size = 5) +
   scale_shape_manual(values = c(18, 16, 17)) +
-  # scale_color_manual(values = c('#CCCC00', '#996600','#66CC33')) +
   scale_color_manual(values = cols) +
-  geom_text(aes(label=sample_data(wine.a)$vineyard), color = "black", size = 3) +
+  geom_text(aes(label = sample_data(wine.a)$vineyard), color = "black",
+            size = 3) +
   ggtitle("NMDS of Bray-Curtis distance") +
-  coord_fixed(ratio = 1)
-p
-p + stat_ellipse(aes(group = treatment), type = "t", linetype = 2, size = 0.2)
+  coord_fixed(ratio = 1) +
+  stat_ellipse(aes(group = treatment), type = "t", linetype = 2, size = 0.2)
 
 
 ## Remove outlier sample (if justified)
@@ -486,18 +481,16 @@ p_nmds
 stressplot(p_nmds)
 
 
-p <- plot_ordination(wine.a.out, p_nmds, color = "treatment",
+plot_ordination(wine.a.out, p_nmds, color = "treatment",
                      shape = "treatment") +
   geom_point(size = 5) +
   scale_shape_manual(values = c(18, 16, 17)) +
-  # scale_color_manual(values = c('#CCCC00', '#996600','#66CC33')) +
   scale_color_manual(values = cols) +
   geom_text(aes(label = sample_data(wine.a.out)$vineyard), color = "black",
             size = 3) +
   ggtitle("NMDS of Bray-Curtis distance outliers removed") +
-  coord_fixed(ratio = 1)
-p
-p + stat_ellipse(aes(group = treatment), type = "t", linetype = 2, size = 0.2)
+  coord_fixed(ratio = 1) +
+  stat_ellipse(aes(group = treatment), type = "t", linetype = 2, size = 0.2)
 
 
 ### Constrained ordination ####
