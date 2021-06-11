@@ -44,8 +44,12 @@ forward GTGYCAGCMGCCGCGGTAA
 reverse ATTAGANACCCNNGTAGTCC
 ```
 
-First, crop the *E. coli* fasta with the 16S-EMP primers, align it to [`silva.seed_v138.align`](https://mothur.org/wiki/silva_reference_files/) and extract relevant columns.
-Then, convert the resulting fasta into an `accnos` file, get the unique sequences from the `align` file and generate a `taxonomy` file.
+1. Crop the *E. coli* fasta with the 16S-EMP primers,
+1. Align it to [`silva.seed_v138.align`](https://mothur.org/wiki/silva_reference_files/) and extract relevant columns,
+1. Convert the resulting fasta into an `accnos` file,
+1. Get the unique sequences from the `align` file and
+1. Extract the taxonomic information from the header.
+
 In `mothur`, run:
 ```
 set.current(processors=6)
@@ -54,7 +58,10 @@ pcr.seqs(fasta=e-coli.fasta, oligos=EMP_16S.oligos)
 system(mv e-coli.pcr.fasta e.coli.V4.fasta)
 align.seqs(fasta=e.coli.V4.fasta, reference=../silva.seed_v138_1.align)
 summary.seqs(fasta=e.coli.V4.align)
+```
 
+From the last command `summary.seqs` enter the coordinates as start and end position:
+```
 screen.seqs(fasta=../silva.full_v138_1.fasta, start=13862, end=23444, maxambig=5)
 pcr.seqs(start=13862, end=23444, keepdots=F)
 degap.seqs()
@@ -65,7 +72,7 @@ get.seqs(fasta=../silva.full_v138_1.good.pcr.fasta, accnos=../silva.full_v138_1.
 system(mv ../silva.full_v138_1.good.pcr.pick.fasta ../silva.v138_1_16S-V4.align)
 
 ## Refuses to write the file, thus, directly created in bash
-grep '>' silva.v138_1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_1_16S-V4.full
+grep '>' ../silva.v138_1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_1_16S-V4.full
 summary.seqs(fasta=../silva.v138_1_16S-V4.align)
 ```
 
