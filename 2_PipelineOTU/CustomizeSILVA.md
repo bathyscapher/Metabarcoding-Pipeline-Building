@@ -74,21 +74,46 @@ unique.seqs()
 system(grep ">" ../silva.full_v138_1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138_1.good.pcr.ng.unique.accnos)
 get.seqs(fasta=../silva.full_v138_1.good.pcr.fasta, accnos=../silva.full_v138_1.good.pcr.ng.unique.accnos)
 system(mv ../silva.full_v138_1.good.pcr.pick.fasta ../silva.v138_1_16S-V4.align)
+```
 
-## Refuses to write the file, thus, directly created in bash
+
+For some reason, `mothur` refuses to write the file, thus, directly create it in bash:
+```
 grep '>' ../silva.v138_1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_1_16S-V4.full
 ```
 
 
+## 18S
+Herein, the final output is `silva.v138.1_16S-V4.full` to classify the sequences.
 
-## Build the SEED references
+The very same as for the 16S above with the *S. cerevisae* 18S rRNA gene [(NR_132222.1)](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta) and the Earth Microbiome Project 18S primers:
 ```
-grep ">" silva.nr_v138.align | cut -f 1,2 | grep "\t100" | cut -f 1 | cut -c 2- > silva.seed_v138.accnos
-mothur "#get.seqs(fasta=silva.nr_v138.align, taxonomy=silva.full_v138.tax, accnos=silva.seed_v138.accnos)"
-mv silva.nr_v138.pick.align silva.seed_v138.align
-mv ../silva.full_v138.pick.tax ../silva.seed_v138.tax
+forward GTACACACCGCCCGTC
+reverse TGATCCTTCYGCAGGTTCACCTAC
+```
 
-mothur "#get.seqs(taxonomy=silva.full_v138.tax, accnos=silva.full_v138.good.pcr.ng.unique.accnos)"
-mv silva.full_v138.pick.tax silva.nr_v138.tax
+
+In `mothur` run:
 ```
+set.current(processors=6)
+set.dir(tempdefault=.)
+pcr.seqs(fasta=s-cerevisiae.fasta, oligos=EMP_18S.primer)
+system(mv s-cerevisiae.pcr.fasta s.cerevisiae.trim2primers.fasta)
+align.seqs(fasta=s.cerevisiae.trim2primers.fasta, reference=silva.seed_v138_1.align)
+summary.seqs(fasta=s.cerevisiae.trim2primers.align)
+
+screen.seqs(fasta=../silva.full_v138.fasta, start=14286, end=27659, maxambig=5)
+pcr.seqs(start=14286, end=27659, keepdots=F)
+degap.seqs()
+unique.seqs()
+
+system(grep ">" silva.full_v138.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > silva.full_v138.good.pcr.ng.unique.accnos)
+get.seqs(fasta=silva.full_v138.good.pcr.fasta, accnos=silva.full_v138.good.pcr.ng.unique.accnos)
+system(mv silva.full_v138.good.pcr.pick.fasta silva.v138_18S-V4.align)
+
+#system(grep '>' ../silva.v138_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_18S-V4.full)
+grep '>' silva.v138_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_18S-V4.full
+summary.seqs(fasta=silva.v138_18S-V4.align)
+\end{lstlisting}
+
 
