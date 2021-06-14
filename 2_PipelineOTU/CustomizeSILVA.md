@@ -73,6 +73,7 @@ unique.seqs()
 system(grep ">" ../silva.full_v138_1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138_1.good.pcr.ng.unique.accnos)
 get.seqs(fasta=../silva.full_v138_1.good.pcr.fasta, accnos=../silva.full_v138_1.good.pcr.ng.unique.accnos)
 system(mv ../silva.full_v138_1.good.pcr.pick.fasta ../silva.v138_1_16S-V4.align)
+summary.seqs(fasta=../silva.v138.1_16S-V4.align)
 ```
 
 
