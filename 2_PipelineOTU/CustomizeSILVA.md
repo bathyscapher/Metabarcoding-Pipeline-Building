@@ -2,14 +2,14 @@
 For each primer pair, a customized SILVA SSU database 138.1 (`silva.full_v138_1.fasta`) was created following the instructions [here](https://mothur.org/blog/2021/SILVA-v138_1-reference-files/) and [here](https://mothur.org/blog/2016/Customization-for-your-region/).
 
 
-Download the db and process it with ARB:
+Download the db and process it with [ARB](http://www.arb-home.de/):
 ```
 wget -N https://www.arb-silva.de/fileadmin/arb_web_db/release_138_1/ARB_files/SILVA_138.1_SSURef_NR99_12_06_20_opt.arb.gz
 gunzip SILVA_138.1_SSURef_NR99_12_06_20_opt.arb.gz
 arb SILVA_138.1_SSURef_NR99_12_06_20_opt.arb
 ```
 
-You may need to install [ARB](http://www.arb-home.de/) before:
+You may need to install ARB before:
 ```
 sudo apt update
 sudo apt install arb
@@ -58,7 +58,6 @@ summary.seqs(fasta=e.coli.V4.align)
 ```
 
 
-
 1. From the last command `summary.seqs` enter the coordinates as start and end position and run in `mothur`,
 1. identify and 
 1. grab the unique sequences without regard to their alignment,
@@ -98,22 +97,23 @@ In `mothur` run:
 set.current(processors=6)
 set.dir(tempdefault=.)
 pcr.seqs(fasta=s-cerevisiae.fasta, oligos=EMP_18S.primer)
-system(mv s-cerevisiae.pcr.fasta s.cerevisiae.trim2primers.fasta)
-align.seqs(fasta=s.cerevisiae.trim2primers.fasta, reference=silva.seed_v138_1.align)
-summary.seqs(fasta=s.cerevisiae.trim2primers.align)
+system(mv s-cerevisiae.pcr.fasta s.cerevisiae.V4.fasta)
+align.seqs(fasta=s.cerevisiae.V4.fasta, reference=../silva.seed_v138_1.align)
+summary.seqs(fasta=s.cerevisiae.V4.align)
 
-screen.seqs(fasta=../silva.full_v138.fasta, start=14286, end=27659, maxambig=5)
-pcr.seqs(start=14286, end=27659, keepdots=F)
+
+screen.seqs(fasta=../silva.full_v138.1.fasta, start=42554, end=43116, maxambig=5)
+pcr.seqs(start=42554, end=43116, keepdots=F)
 degap.seqs()
 unique.seqs()
 
-system(grep ">" silva.full_v138.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > silva.full_v138.good.pcr.ng.unique.accnos)
-get.seqs(fasta=silva.full_v138.good.pcr.fasta, accnos=silva.full_v138.good.pcr.ng.unique.accnos)
-system(mv silva.full_v138.good.pcr.pick.fasta silva.v138_18S-V4.align)
+system(grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos)
+get.seqs(fasta=../silva.full_v138.1.good.pcr.fasta, accnos=../silva.full_v138.1.good.pcr.ng.unique.accnos)
+system(mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_18S-V4.align)
+summary.seqs(fasta=../silva.v138.1_18S-V4.align)
+```
 
-#system(grep '>' ../silva.v138_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_18S-V4.full)
-grep '>' silva.v138_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138_18S-V4.full
-summary.seqs(fasta=silva.v138_18S-V4.align)
-\end{lstlisting}
-
-
+For some reason, `mothur` refuses to write the file, thus, directly create it in bash:
+```
+grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v138.1_18S-V4.full
+```
