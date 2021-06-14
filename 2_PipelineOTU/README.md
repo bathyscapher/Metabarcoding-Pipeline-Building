@@ -62,14 +62,14 @@ summary.seqs(fasta=current, count=current)
 ### Align the contigs to SILVA
 Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
 
-*Tip:* instructions to taylor the SILVA database to specific primers are [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
+*Tip:* instructions to taylor the SILVA database to specific primers can be found [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
 
 ```bash
 ### 16S
-align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132_EMP16S.align, flip=f)
+align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=../../silva/prok/silva.v138.1_18S-V4.align, flip=f)
 
 ### 18S
-align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=silva.v132_EMP18S.align, flip=f)
+align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=../../silva/euk/silva.v138.1_18S-V4.align, flip=f)
 
 summary.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table)
 get.current()
