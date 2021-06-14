@@ -66,7 +66,7 @@ Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) referen
 
 ```bash
 ### 16S
-align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=../../silva/prok/silva.v138.1_18S-V4.align, flip=f)
+align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=../../silva/prok/silva.v138.1_16S-V4.align, flip=f)
 
 ### 18S
 align.seqs(fasta=wine.trim.contigs.good.unique.fasta, reference=../../silva/euk/silva.v138.1_18S-V4.align, flip=f)
