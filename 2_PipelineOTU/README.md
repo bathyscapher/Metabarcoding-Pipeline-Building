@@ -62,7 +62,7 @@ summary.seqs(fasta=current, count=current)
 ### Align the contigs to SILVA
 Align the contigs to the (customized) [SILVA](https://www.arb-silva.de/) reference data base.
 
-*Tip:* instructions to taylor the SILVA database to specific primers can be found [here](http://blog.mothur.org/2018/01/10/SILVA-v132-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
+*Tip:* instructions to taylor the SILVA database to specific primers can be found [here](http://blog.mothur.org/2018/01/10/SILVA-v138.1-reference-files/) and [here](http://blog.mothur.org/2016/07/07/Customization-for-your-region/).
 
 ```bash
 ### 16S
@@ -78,7 +78,7 @@ get.current()
 Screen once more to ensure that all sequences overlap the same region.
 ```bash
 ### 16S
-screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9581)
+screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9582)
 
 ### 18S
 screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=4, end=562)
@@ -138,23 +138,23 @@ get.current()
 Assign sequences to the reference database and taxonomy with the [Ribosomal Database Project (RDP) classifier](https://aem.asm.org/content/73/16/5261).
 ```bash
 ### 16S
-classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132_EMP16S.align, taxonomy=silva.v132_EMP16S.tax, method=wang, cutoff=80)
+classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=../../silva/prok/silva.v138.1_16S-V4.align, taxonomy=../../silva/prok/silva.v138.1_16S-V4.tax, method=wang, cutoff=80)
 
 ### 18S
-classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=silva.v132_EMP18S.align, taxonomy=silva.v132_EMP18S.tax, cutoff=80)
+classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, reference=../../silva/prok/silva.v138.1_18S-V4.align, taxonomy=../../silva/prok/silva.v138.1_18S-V4.tax, method=wang, cutoff=80)
 
 get.current()
 ```
 
 
 ### Classify OTUs
-Find consensus taxonomy for an OTU.
+Find consensus taxonomy for an OTU. **WHERE IS THE LIST FILE?**
 ```bash
 ### 16S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
 
 ### 18S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132.wang.taxonomy)
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
 
 get.current()
 ```
@@ -183,10 +183,10 @@ count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 Get consenus taxonomy for OTUs.
 ```bash
 ### 16S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP16S.wang.taxonomy, label=0.03)
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP16S.wang.taxonomy, label=0.03)
 
 ### 18S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v132_EMP18S.wang.taxonomy, label=0.03)
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP18S.wang.taxonomy, label=0.03)
 
 get.current()
 ```

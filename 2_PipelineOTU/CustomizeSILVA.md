@@ -1,5 +1,5 @@
 # Customize SILVA db as reference alignment
-For each primer pair, a customized SILVA SSU database 138.1 (`silva.full_v138.1.fasta`) was created following the instructions [here](https://mothur.org/blog/2021/SILVA-v138.1-reference-files/) and [here](https://mothur.org/blog/2016/Customization-for-your-region/).
+For each primer pair, a customized SILVA SSU database 138.1 (`silva.full_v138.1.fasta`) was created following the instructions [here](https://mothur.org/blog/2021/SILVA-v138_1-reference-files/) and [here](https://mothur.org/blog/2016/Customization-for-your-region/).
 
 
 Download the db and process it with [ARB](http://www.arb-home.de/):
@@ -117,3 +117,5 @@ For some reason, `mothur` refuses to write the file, thus, directly create it in
 ```
 grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v138.1_18S-V4.full
 ```
+
+##
