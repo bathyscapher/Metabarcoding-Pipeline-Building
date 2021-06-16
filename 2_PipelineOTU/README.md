@@ -146,28 +146,26 @@ classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.
 get.current()
 ```
 
-
 ### Classify OTUs
-Find consensus taxonomy for an OTU. **WHERE IS THE LIST FILE?**
+Find consensus taxonomy for an OTU. **SKIEPPED THIS PART AS THE LIST FILE IS MISSING**
 ```bash
 ### 16S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP16S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
+#classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_16S-V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
 
 ### 18S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP18S.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
+#classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_18S-V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
 
-get.current()
+#get.current()
 ```
+
 
 ### Compute distance matrix and cluster OTUs
 Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.1 are ignored to safe resources (note: avoid `cluster.split`, results are inaccurate). Then, cluster this sequences into OTUs with the [OptiClust](https://msphere.asm.org/content/2/2/e00073-17) method.
 ```bash
 dist.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, cutoff=0.1)
-
 get.current()
 
 cluster(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, cutoff=0.03, method=opti)
-
 get.current()
 ```
 
@@ -175,7 +173,6 @@ get.current()
 Create a .shared and a .rabund file samplewise. Set the threshold (by convention a 3 % barcoding gap) and create the OTU-table.
 ```bash
 make.shared(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
-
 count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.shared)
 ```
 
@@ -183,20 +180,21 @@ count.seqs(shared=wine.trim.contigs.good.unique.good.filter.unique.precluster.pi
 Get consenus taxonomy for OTUs.
 ```bash
 ### 16S
-classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP16S.wang.taxonomy, label=0.03)
-
+classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.1_16S_V4.wang.taxonomy, label=0.03)
+         
 ### 18S
 classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_EMP18S.wang.taxonomy, label=0.03)
 
 get.current()
 ```
 
+
 ### Get representative sequences for OTUs
 * = cluster centroids?
 
 Returns a FASTA file where the headers additionally carry the OTU number and the total abundance.
 ```bash
-get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, label=0.03)
+get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, cutoff=0.03)
 ```
 
 ### Rarefaction curves
@@ -212,8 +210,13 @@ Further process them with [this R script](mothur_RarefactionCurves.R).
 ### Track reads
 Survey where the reads are 'lost' in the pipeline.
 ```bash
-awk -f transposeList2Table.awk <(grep ’mothur > \|# of’ mothur.*.logfile | grep ’# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos’ | sed -r ’s/mothur > /mothur:/’ | sed -r ’s/mothur/\nmothur/’ | sed -r ’s/\t/ /’ | sed -r ’s/#/Number/’) > countReadsMothur.csv
+awk -f /home/rstudio/Metabarcoding-Pipeline-Building/2/transposeList2Table.awk <(
+grep 'mothur > \|# of' mothur.*.logfile | grep '# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos' | sed -r 's/mothur > /mothur: /' | sed -r 's/mothur/\nmothur/' | sed -r 's/\t/ /' | sed -r 's/#/Number/') > countReads
 ```
 Further process them with [this R script](mothur_TrackReads.R).
 
-![Reads loss in the mothur pipeline](/Graphs/mothur_TrackReads.png)
+![Read loss in the mothur pipeline](/Graphs/mothur_TrackReads.png)
+
+
+
+
