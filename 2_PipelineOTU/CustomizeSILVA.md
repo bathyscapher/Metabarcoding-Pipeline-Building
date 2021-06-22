@@ -53,7 +53,7 @@ set.current(processors=6)
 set.dir(tempdefault=.)
 pcr.seqs(fasta=e-coli.fasta, oligos=EMP_16S.oligos)
 system(mv e-coli.pcr.fasta e.coli.V4.fasta)
-align.seqs(fasta=e.coli.V4.fasta, reference=../silva.seed_v138.1.align)
+align.seqs(fasta=e.coli.V4.fasta, reference=../silva.seed_v138_1.align)
 summary.seqs(fasta=e.coli.V4.align)
 ```
 
@@ -97,8 +97,8 @@ In `mothur` run:
 set.current(processors=6)
 set.dir(tempdefault=.)
 pcr.seqs(fasta=s-cerevisiae.fasta, oligos=EMP_18S.primer)
-system(mv s-cerevisiae.pcr.fasta s.cerevisiae.V4.fasta)
-align.seqs(fasta=s.cerevisiae.V4.fasta, reference=../silva.seed_v138.1.align)
+system(command='mv s-cerevisiae.pcr.fasta s.cerevisiae.V4.fasta')
+align.seqs(fasta=s.cerevisiae.V4.fasta, reference=../silva.seed_v138_1.align)
 summary.seqs(fasta=s.cerevisiae.V4.align)
 
 
@@ -107,15 +107,14 @@ pcr.seqs(start=42554, end=43116, keepdots=F)
 degap.seqs()
 unique.seqs()
 
-system(grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos)
+system(command='grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos')
 get.seqs(fasta=../silva.full_v138.1.good.pcr.fasta, accnos=../silva.full_v138.1.good.pcr.ng.unique.accnos)
-system(mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_18S-V4.align)
+system(command='mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_18S-V4.align')
 summary.seqs(fasta=../silva.v138.1_18S-V4.align)
 ```
 
-For some reason, `mothur` refuses to write the file, thus, directly create it in bash:
+For some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash (should work in the next `mothur` version):
 ```
 grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v138.1_18S-V4.full
 ```
 
-##
