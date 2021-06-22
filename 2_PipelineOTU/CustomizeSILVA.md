@@ -58,26 +58,31 @@ summary.seqs(fasta=e.coli.V4.align)
 ```
 
 
-1. Enter the coordinates from the last `summary.seqs` command as start and end position and run in `mothur`,
-    ```
-    screen.seqs(fasta=../silva.full_v138.1.fasta, start=13862, end=23444, maxambig=5)
-    pcr.seqs(start=13862, end=23444, keepdots=F)
-    degap.seqs()
-    unique.seqs()
-    ```
-1. Then, identify and 
-1. grab the unique sequences without regard to their alignment,
-1. rename the fasta to `align` file and
+Enter the coordinates from the last `summary.seqs` command as start and end position and run in `mothur`:
+```
+screen.seqs(fasta=../silva.full_v138.1.fasta, start=13862, end=23444, maxambig=5)
+pcr.seqs(start=13862, end=23444, keepdots=F)
+degap.seqs()
+unique.seqs()
+```
+1. This removes sequences that are not full length and have more than 5 ambiguous base calls, 
+1. `pcr.seqs` converts all bases that occur before the given start- and after the given stop position to `.`, so that the sequences only span the region between the given primer binding sites.
+1. We unalign the sequences (`degap.seqs`) and
+1. identify the unique sequences.
+1. We convert the resulting `fasta` file into an `accnos` file
+1. what allows to pull out the unique sequences from the aligned file (`get.seqs`),
+1. rename the `fasta` to `align` file and
 1. extract the taxonomic information from the header.
-    ```
-    system(grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos)
-    get.seqs(fasta=../silva.full_v138.1.good.pcr.fasta, accnos=../silva.full_v138.1.good.pcr.ng.unique.accnos)
-    system(command='mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_16S-V4.align')
-    ```
-    For some reason, `mothur` refuses to write this file, thus, directly create it in bash:
-    ```
-    grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1_16S-V4.full
-    ```
+```
+system(grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos)
+get.seqs(fasta=../silva.full_v138.1.good.pcr.fasta, accnos=../silva.full_v138.1.good.pcr.ng.unique.accnos)
+system(command='mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_16S-V4.align')
+```
+
+For some reason, `mothur` refuses to write this file, thus, directly create it in bash:
+```
+grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1_16S-V4.full
+```
 
 
 ## 18S
