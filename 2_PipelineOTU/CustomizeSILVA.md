@@ -61,12 +61,12 @@ summary.seqs(fasta=e.coli.V4.align)
 Run in `mothur`:
 1. Entering the coordinates from the last `summary.seqs` command as start and end position removes sequences that are not full length (additionally, filter for sequences with more than 5 ambiguous base calls).
 1. `pcr.seqs` converts all bases that occur before the given start- and after the given stop position to `.`, so that the sequences only span the region between the given primer binding sites.
-1. We unalign the sequences (`degap.seqs`) and
-1. identify the unique sequences.
-1. We convert the resulting `fasta` file into an `accnos` file
+1. Unalign the sequences (`degap.seqs`) and
+1. identify the unique sequences (`unique.seqs`).
+1. Convert the resulting `fasta` file into an `accnos` file
 1. what allows to pull out the unique sequences from the aligned file (`get.seqs`),
 1. rename the `fasta` to `align` file and
-1. extract the taxonomic information from the header (for some reason, `mothur` refuses to write this file, thus, directly create it in bash)
+1. extract the taxonomic information from the header (for some reason, `mothur` refuses to write this file, thus, directly create it in bash):
 ```
 # in mothur
 screen.seqs(fasta=../silva.full_v138.1.fasta, start=13862, end=23444, maxambig=5)
