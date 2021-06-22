@@ -1,7 +1,7 @@
 ################################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
-### Quality filtering with dada2
+### dada2 pipeline
 ### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
@@ -16,8 +16,8 @@ rm(list = ls())
 
 
 ## Choose pro- or eukaryotes
-primer <- "16S"
-# primer <- "18S"
+# primer <- "16S"
+primer <- "18S"
 
 
 if (primer == "16S") {
@@ -30,7 +30,7 @@ getwd()
 
 
 ################################################################################
-ncore <- 9 # number of available processors
+ncore <- 6 # number of available processors
 
 list.files(pattern = "fastq.gz")
 

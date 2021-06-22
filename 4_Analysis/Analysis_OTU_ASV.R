@@ -98,7 +98,7 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
 ################################################################################
 ### Read taxa into phyloseq object ####
 ## Note: for now choose RDP for OTU, DECIPHER for ASV
-method <- "ASV"
+method <- "OTU"
 primer <- "16S"
 classifier <- "RDP"
 # classifier <- "DECIPHER"
@@ -171,22 +171,25 @@ colSums(readsumsdf[, 1, drop = FALSE])
 
 ################################################################################
 ### Remove spurious taxa ####
-ifelse(primer == "16S",
-       wine.s <- subset_taxa(wine, !(Domain %in% c("unknown") |
-                                       Phylum %in% c("Eukaryota_unclassified",
-                                                     NA) |
-                                       Order %in% c("Chloroplast") |
-                                       Family %in% c("Mitochondria"))),
-       wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
-                                       Phylum %in% c("Eukaryota_unclassified",
-                                                     "Mollusca", "Vertebrata",
-                                                     NA) |
-                                       Class %in% c("Insecta", "Ellipura",
-                                                    "Embryophyta", "Arachnida",
-                                                    "Heterophyidae",
-                                                    "Ichthyophonae",
-                                                    "Arthropoda_unclassified",
-                                                    "unclassified_Hexapoda"))))
+if(primer == "16S")
+  {
+  wine.s <- subset_taxa(wine, !(Domain %in% c("unknown", "Eukaryota") |
+                                  Phylum %in% c("Eukaryota_unclassified", NA) |
+                                  Order %in% c("Chloroplast") |
+                                  Family %in% c("Mitochondria")))
+  }
+
+if(primer == "16S")
+  {
+  wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
+                                  Phylum %in% c("Eukaryota_unclassified",
+                                                "Mollusca", "Vertebrata", NA) |
+                                  Class %in% c("Insecta", "Ellipura",
+                                               "Embryophyta", "Arachnida",
+                                               "Heterophyidae", "Ichthyophonae",
+                                               "Arthropoda_unclassified",
+                                               "unclassified_Hexapoda")))
+  }
 
 
 ################################################################################

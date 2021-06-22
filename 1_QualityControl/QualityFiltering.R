@@ -17,20 +17,20 @@ rm(list = ls())
 
 
 ## Choose pro- or eukaryotes
-primer <- "16S"
-# primer <- "18S"
+# primer <- "16S"
+primer <- "18S"
 
 
 if (primer == "16S") {
   setwd("/home/rstudio/prok/")
   } else {setwd("/home/rstudio/euk/")}
-# getwd()
+getwd()
 
 
 ################################################################################
-## Set number of available processors (run "nproc" in bash reveals number of 
+## Set number of available processors (run "nproc" in bash reveals number of
 ## available processors)
-ncore <- 6 
+ncore <- 6
 
 
 list.files(pattern = "fastq.gz")
@@ -125,15 +125,14 @@ rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = rF.cut[[reads]]),
       REV.ReverseReads = sapply(REV.orients, primerHits, fn = rR.cut[[reads]]))
 
 
-### Filter and trim. Place filtered files in filtered/ subdirectory for 16S and 
-### 18S
+### Filter and trim. Place filtered files in filtered/ subdirectory by domain
 if (primer == "16S") {
-  rF.cut.f <- file.path("filtered", paste0(sample.names, 
+  rF.cut.f <- file.path("filtered", paste0(sample.names,
                                            "_16S_R1_filt.fastq.gz"))
-  rR.cut.f <- file.path("filtered", paste0(sample.names, 
+  rR.cut.f <- file.path("filtered", paste0(sample.names,
                                            "_16S_R2_filt.fastq.gz"))
   } else {
-  rF.cut.f <- file.path("filtered", paste0(sample.names, 
+  rF.cut.f <- file.path("filtered", paste0(sample.names,
                                            "_18S_R1_filt.fastq.gz"))
   rR.cut.f <- file.path("filtered", paste0(sample.names,
                                            "_18S_R2_filt.fastq.gz"))
@@ -148,9 +147,6 @@ FASTQ.f <- filterAndTrim(rF.fN, rF.cut.f, rR.fN, rR.cut.f,
                      maxN = 0, maxEE = c(2, 2), minLen = 100,
                      truncQ = 2, rm.phix = TRUE,
                      compress = TRUE, multithread = ncore, verbose = TRUE)
-
-
-saveRDS(FASTQ.f, "FASTQ.f.rds")
 
 
 ### Plot quality profiles exemplarily
