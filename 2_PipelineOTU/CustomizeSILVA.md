@@ -2,6 +2,7 @@
 For each primer pair, a customized SILVA SSU database 138.1 (`silva.full_v138.1.fasta`) was created following the instructions [here](https://mothur.org/blog/2021/SILVA-v138_1-reference-files/) and [here](https://mothur.org/blog/2016/Customization-for-your-region/).
 
 
+## Format SILVA database
 Download the SILVA db 138.1 and process it with [ARB](http://www.arb-home.de/):
 ```
 wget -N https://www.arb-silva.de/fileadmin/arb_web_db/release_138.1/ARB_files/SILVA_138.1_SSURef_NR99_12_06_20_opt.arb.gz
@@ -35,7 +36,12 @@ In ARB,
 1. Quit ARB.
 
 
-## 16S
+## SILVA SEED
+Also, download the recreated [SILVA SEED db](https://mothur.s3.us-east-2.amazonaws.com/wiki/silva.seed_v138_1.tgz).
+
+
+## Customize the db to the sequenced region
+### 16S
 Herein, the final output is `silva.v138.1_16S-V4.align` to classify the sequences.
 
 The *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region by the respective primers (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the [Earth Microbiome Project 16S primers](https://earthmicrobiome.org/protocols-and-standards/16s/) would look in an `oligos` file as follows:
@@ -87,7 +93,7 @@ grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1
 ```
 
 
-## 18S
+### 18S
 Herein, the final output is `silva.v138.1_18S-V4.align` to classify the sequences.
 
 The very same as for the 16S above, but with the *S. cerevisae* 18S rRNA gene ([NR_132222.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta)) and the [Earth Microbiome Project 18S primers](https://earthmicrobiome.org/protocols-and-standards/18s/):
@@ -254,5 +260,3 @@ write.table(tax.write[, c("taxaID", "taxout")],
             file = "euk/silva.v138.1_18S-V4.tax",
             sep = "\t", row.names = FALSE, quote = FALSE, col.names = FALSE)
 ```
-
-
