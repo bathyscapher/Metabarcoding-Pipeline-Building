@@ -38,10 +38,14 @@ In ARB,
 ## 16S
 Herein, the final output is `silva.v138.1_16S-V4.align` to classify the sequences.
 
-The *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region by the respective primers (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the Earth Microbiome Project 16S primers would look like in an `oligos` file as follows:
+The *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region by the respective primers (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the [Earth Microbiome Project 16S primers](https://earthmicrobiome.org/protocols-and-standards/16s/) would look in an `oligos` file as follows:
 ```
 forward GTGYCAGCMGCCGCGGTAA
 reverse ATTAGANACCCNNGTAGTCC
+```
+or:
+```
+forward GTGYCAGCMGCCGCGGTAA ATTAGANACCCNNGTAGTCC
 ```
 
 1. Crop the *E. coli* fasta with the 16S-EMP primers,
@@ -84,9 +88,9 @@ grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1
 
 
 ## 18S
-Herein, the final output is `silva.v138.1_16S-V4.align` to classify the sequences.
+Herein, the final output is `silva.v138.1_18S-V4.align` to classify the sequences.
 
-The very same as for the 16S above with the *S. cerevisae* 18S rRNA gene [(NR_132222.1)](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta) and the Earth Microbiome Project 18S primers:
+The very same as for the 16S above, but with the *S. cerevisae* 18S rRNA gene ([NR_132222.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta)) and the [Earth Microbiome Project 18S primers[(https://earthmicrobiome.org/protocols-and-standards/18s/):
 ```
 forward GTACACACCGCCCGTC
 reverse TGATCCTTCYGCAGGTTCACCTAC
@@ -120,12 +124,10 @@ grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v13
 ```
 
 
-
 ## Formatting the taxonomy files
-Herein, the final output is `silva.v138.1_16S-V4.tax` and `silva.v138.1_18S-V4.tax`, respectively, to **xxx**.
+Herein, the final output is `silva.v138.1_16S-V4.tax` and `silva.v138.1_18S-V4.tax`, respectively, to taxonomically classify the sequences.
 
 
-Now, format  we want to make sure the taxonomy file is properly formatted for use with mothur.
 First, download the SILVA taxa mapping file:
 ```
 wget https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/taxonomy/tax_slv_ssu_138.1.txt.gz
@@ -248,7 +250,5 @@ write.table(tax.write[, c("taxaID", "taxout")],
             file = "euk/silva.v138.1_18S-V4.tax",
             sep = "\t", row.names = FALSE, quote = FALSE, col.names = FALSE)
 ```
-
-
 
 
