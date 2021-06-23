@@ -90,7 +90,7 @@ grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1
 ## 18S
 Herein, the final output is `silva.v138.1_18S-V4.align` to classify the sequences.
 
-The very same as for the 16S above, but with the *S. cerevisae* 18S rRNA gene ([NR_132222.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta)) and the [Earth Microbiome Project 18S primers[(https://earthmicrobiome.org/protocols-and-standards/18s/):
+The very same as for the 16S above, but with the *S. cerevisae* 18S rRNA gene ([NR_132222.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta)) and the [Earth Microbiome Project 18S primers](https://earthmicrobiome.org/protocols-and-standards/18s/):
 ```
 forward GTACACACCGCCCGTC
 reverse TGATCCTTCYGCAGGTTCACCTAC
