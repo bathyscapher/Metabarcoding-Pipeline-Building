@@ -10,7 +10,7 @@
 
 
 rm(list = ls())
-setwd("~/docker/silva/")
+setwd("/home/rstudio/silva/")
 
 
 map.in <- read.table("tax_slv_ssu_138.1.txt", header = FALSE, sep = "\t",
@@ -86,26 +86,7 @@ tax.in <- read.table("euk/silva.v138.1_18S-V4.full", header = FALSE,
 colnames(tax.in) <- c("taxaID", "Taxa")
 
 
-## Correct the "...;Polaribacter;Polaribacter;" problem
-# tax.in$Taxa <- gsub("Polaribacter;Polaribacter;", "Polaribacter;",
-#                         tax.in$Taxa)
-# tax.in$Taxa <- gsub("Polaribacter;Polaribacter 3;", "Polaribacter 3;",
-#                         tax.in$Taxa)
-tax.in$Taxa <- gsub(";[[:space:]]+$", ";", tax.in$Taxa)
-
-
-## Replace double semicolon
-tax.in$Taxa <- gsub("Bacteria;GBS-1;;", "Bacteria;GBS-1;", tax.in$Taxa)
-
-## Insert missing final ';'
-tax.in$Taxa <- gsub("D64120.DX3Polym", "D64120.DX3Polym;", tax.in$Taxa)
-
-## Remove white space in 'Incertae sedis'
-tax.in$Taxa <- gsub("Incertae sedis;", "Incertae_Sedis;", tax.in$Taxa)
-
-
 tax.in$id <- 1:nrow(tax.in)
-
 tax.write <- merge(tax.in, map.in, all.x = TRUE, sort = FALSE)
 tax.write <- tax.write[order(tax.write$id), ]
 
@@ -117,8 +98,7 @@ getDepth <- function(taxonString){
   initial <- nchar(taxonString)
   removed <- nchar(gsub(";", "", taxonString))
   return(initial - removed)
-}
-
+  }
 
 
 depth <- getDepth(tax.write$taxout)
@@ -126,7 +106,6 @@ summary(depth) # should all be 6 and there should be no NAs
 
 
 tax.write[is.na(tax.write$taxout), ]
-
 
 
 bacteria <- grepl("Bacteria;", tax.write$taxout)
