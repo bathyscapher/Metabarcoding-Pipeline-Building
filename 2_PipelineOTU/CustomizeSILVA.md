@@ -2,7 +2,7 @@
 For each primer pair, a customized SILVA SSU database 138.1 (`silva.full_v138.1.fasta`) was created following the instructions [here](https://mothur.org/blog/2021/SILVA-v138_1-reference-files/) and [here](https://mothur.org/blog/2016/Customization-for-your-region/).
 
 
-Download the db and process it with [ARB](http://www.arb-home.de/):
+Download the SILVA db 138.1 and process it with [ARB](http://www.arb-home.de/):
 ```
 wget -N https://www.arb-silva.de/fileadmin/arb_web_db/release_138.1/ARB_files/SILVA_138.1_SSURef_NR99_12_06_20_opt.arb.gz
 gunzip SILVA_138.1_SSURef_NR99_12_06_20_opt.arb.gz
