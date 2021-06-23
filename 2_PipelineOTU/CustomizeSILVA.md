@@ -95,6 +95,10 @@ The very same as for the 16S above, but with the *S. cerevisae* 18S rRNA gene ([
 forward GTACACACCGCCCGTC
 reverse TGATCCTTCYGCAGGTTCACCTAC
 ```
+or:
+```
+forward GTACACACCGCCCGTC TGATCCTTCYGCAGGTTCACCTAC
+```
 
 
 In `mothur` run:
