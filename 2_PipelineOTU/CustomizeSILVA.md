@@ -36,7 +36,7 @@ In ARB,
 
 
 ## 16S
-Herein, the final output is `silva.v138.1_16S-V4.full` to classify the sequences.
+Herein, the final output is `silva.v138.1_16S-V4.align` to classify the sequences.
 
 The *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region by the respective primers (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the Earth Microbiome Project 16S primers would look like in an `oligos` file as follows:
 ```
@@ -66,7 +66,7 @@ Run in `mothur`:
 1. Convert the resulting `fasta` file into an `accnos` file
 1. what allows to pull out the unique sequences from the aligned file (`get.seqs`),
 1. rename the `fasta` to `align` file and
-1. extract the taxonomic information from the header (for some reason, `mothur` refuses to write this file, thus, directly create it in bash):
+1. extract the taxonomic information from the header (for some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash (should work in the next `mothur` version)):
 ```
 # in mothur
 screen.seqs(fasta=../silva.full_v138.1.fasta, start=13862, end=23444, maxambig=5)
@@ -84,7 +84,7 @@ grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1
 
 
 ## 18S
-Herein, the final output is `silva.v138.1_16S-V4.full` to classify the sequences.
+Herein, the final output is `silva.v138.1_16S-V4.align` to classify the sequences.
 
 The very same as for the 16S above with the *S. cerevisae* 18S rRNA gene [(NR_132222.1)](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta) and the Earth Microbiome Project 18S primers:
 ```
@@ -97,7 +97,7 @@ In `mothur` run:
 ```
 set.current(processors=6)
 set.dir(tempdefault=.)
-pcr.seqs(fasta=s-cerevisiae.fasta, oligos=EMP_18S.primer)
+pcr.seqs(fasta=s-cerevisiae.fasta, oligos=EMP_18S.oligos)
 system(command='mv s-cerevisiae.pcr.fasta s.cerevisiae.V4.fasta')
 align.seqs(fasta=s.cerevisiae.V4.fasta, reference=../silva.seed_v138_1.align)
 summary.seqs(fasta=s.cerevisiae.V4.align)
@@ -119,9 +119,13 @@ For some reason, `mothur 1.45.3` refuses to write the file, thus, directly creat
 grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v138.1_18S-V4.full
 ```
 
-## Formatting the taxonomy files
-Now, format  we want to make sure the taxonomy file is properly formatted for use with mothur.
 
+
+## Formatting the taxonomy files
+Herein, the final output is `silva.v138.1_16S-V4.tax` and `silva.v138.1_18S-V4.tax`, respectively, to **xxx**.
+
+
+Now, format  we want to make sure the taxonomy file is properly formatted for use with mothur.
 First, download the SILVA taxa mapping file:
 ```
 wget https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/taxonomy/tax_slv_ssu_138.1.txt.gz
