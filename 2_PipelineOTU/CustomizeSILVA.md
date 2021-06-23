@@ -70,7 +70,7 @@ Run in `mothur`:
 1. Convert the resulting `fasta` file into an `accnos` file
 1. what allows to pull out the unique sequences from the aligned file (`get.seqs`),
 1. rename the `fasta` to `align` file and
-1. extract the taxonomic information from the header (for some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash (should work in the next `mothur` version)):
+1. extract the taxonomic information from the header (for some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash ([should work in the next `mothur` version](https://github.com/mothur/mothur/issues/782))):
 ```
 # in mothur
 screen.seqs(fasta=../silva.full_v138.1.fasta, start=13862, end=23444, maxambig=5)
@@ -122,7 +122,7 @@ system(command='mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_18S-
 summary.seqs(fasta=../silva.v138.1_18S-V4.align)
 ```
 
-For some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash (should work in the next `mothur` version):
+For some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash ([should work in the next `mothur` version](https://github.com/mothur/mothur/issues/782)):
 ```
 grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v138.1_18S-V4.full
 ```
