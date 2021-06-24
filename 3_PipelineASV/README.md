@@ -102,8 +102,21 @@ sum(asv.tab.nochim) / sum(asv.tab)
 saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 ```
 
-## Assign taxonomy with IdTaxa and SILVA
-Convert the chimera-free sequences into a `DNAStringSet`, load the SILVA db and classify the sequences.
+## Assign taxonomy
+Convert the chimera-free sequences into a `DNAStringSet`, load the SILVA db and classify the sequences. There are two classifiers implemented in `dada2`: the RDP classifier and IdTaxa.
+
+### RDP classifier
+```R
+taxa <- assignTaxonomy(asv.tab.nochim,
+                       "silva_nr99_v138.1_train_set.fa.gz",
+                       multithread = TRUE, verbose = TRUE)
+
+
+saveRDS(taxa, "taxa.rds")
+```
+
+### IdTaxa
+
 ```R
 dna <- DNAStringSet(getSequences(asv.tab.nochim))
 
