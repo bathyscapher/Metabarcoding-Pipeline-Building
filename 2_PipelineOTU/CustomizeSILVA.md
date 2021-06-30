@@ -94,6 +94,13 @@ grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1
 
 
 ### 18S
+```
+wget -N https://www.arb-silva.de/fileadmin/silva_databases/release_132/ARB_files/SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz
+gunzip SILVA_132_SSURef_NR99_13_12_17_opt.arb.gz
+arb SILVA_132_SSURef_NR99_13_12_17_opt.arb
+```
+
+
 Herein, the final output is `silva.v138.1_18S-V4.align` to classify the sequences.
 
 The very same as for the 16S above, but with the *S. cerevisae* 18S rRNA gene ([NR_132222.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_132222.1?report=fasta)) and the [Earth Microbiome Project 18S primers](https://earthmicrobiome.org/protocols-and-standards/18s/):
@@ -113,24 +120,26 @@ set.current(processors=6)
 set.dir(tempdefault=.)
 pcr.seqs(fasta=s-cerevisiae.fasta, oligos=EMP_18S.oligos)
 system(command='mv s-cerevisiae.pcr.fasta s.cerevisiae.V4.fasta')
-align.seqs(fasta=s.cerevisiae.V4.fasta, reference=../silva.seed_v138_1.align)
+align.seqs(fasta=s.cerevisiae.V4.fasta, reference=silva.seed_v132.align)
 summary.seqs(fasta=s.cerevisiae.V4.align)
 
+# create fasta by degapping the align file
+degap.seqs(fasta=silva.seed_v132.align)
 
-screen.seqs(fasta=../silva.full_v138.1.fasta, start=42554, end=43116, maxambig=5)
+screen.seqs(fasta=silva.seed_v132.ng.fasta, start=42554, end=43116, maxambig=5)
 pcr.seqs(start=42554, end=43116, keepdots=F)
 degap.seqs()
 unique.seqs()
 
-system(command='grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos')
-get.seqs(fasta=../silva.full_v138.1.good.pcr.fasta, accnos=../silva.full_v138.1.good.pcr.ng.unique.accnos)
-system(command='mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_18S-V4.align')
-summary.seqs(fasta=../silva.v138.1_18S-V4.align)
+system(command='grep ">" silva.full_v132.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > silva.full_v132.good.pcr.ng.unique.accnos')
+get.seqs(fasta=silva.full_v132.good.pcr.fasta, accnos=silva.full_v132.good.pcr.ng.unique.accnos)
+system(command='mv silva.full_v132.good.pcr.pick.fasta silva.v132_18S-V4.align')
+summary.seqs(fasta=silva.v132_18S-V4.align)
 ```
 
 For some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash ([should work in the next `mothur` version](https://github.com/mothur/mothur/issues/782)):
 ```
-grep '>' ../silva.v138.1_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > ../silva.v138.1_18S-V4.full
+grep '>' silva.v132_18S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v132_18S-V4.full
 ```
 
 

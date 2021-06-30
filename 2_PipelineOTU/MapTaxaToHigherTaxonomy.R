@@ -11,6 +11,7 @@
 
 rm(list = ls())
 setwd("/home/rstudio/silva/")
+setwd("~/docker/silva/euk/")
 
 
 map.in <- read.table("tax_slv_ssu_138.1.txt", header = FALSE, sep = "\t",
