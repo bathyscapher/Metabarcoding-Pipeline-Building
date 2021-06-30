@@ -41,6 +41,7 @@ rR <- sort(list.files(pattern = "_R2_sub.fastq.gz", full.names = TRUE))
 
 ## Extract sample names
 sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 3)
+sample.names
 
 
 ### Check for primers
@@ -57,8 +58,10 @@ if (primer == "16S") {
   FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
   REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
   } else {
-  FWD <- "GTACACACCGCCCGTC" # Euk_1391f
-  REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
+  # FWD <- "GTACACACCGCCCGTC" # Euk_1391f
+  # REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
+    FWD <- "CGGTAAYTCCAGCTCYV" # smp
+    REV <- "CCGTCAATTHCTTYAART" # smp
   }
 
 
@@ -144,9 +147,10 @@ names(rR.cut.f) <- sample.names
 
 ### Quality filtering
 FASTQ.f <- filterAndTrim(rF.fN, rF.cut.f, rR.fN, rR.cut.f,
-                     maxN = 0, maxEE = c(2, 2), minLen = 100,
-                     truncQ = 2, rm.phix = TRUE,
-                     compress = TRUE, multithread = ncore, verbose = TRUE)
+                         maxN = 0, maxEE = c(2, 2), minLen = 100,
+                         truncQ = 2, rm.phix = TRUE,
+                         compress = TRUE, multithread = ncore, verbose = TRUE)
+head(FASTQ.f)
 
 
 ### Plot quality profiles exemplarily
