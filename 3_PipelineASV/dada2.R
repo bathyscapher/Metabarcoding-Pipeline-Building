@@ -9,6 +9,7 @@
 
 
 library("dada2")
+packageVersion("dada2")
 library("DECIPHER")
 
 
@@ -24,9 +25,10 @@ if (primer == "16S") {
   setwd("/home/rstudio/prok/filtered/")
   } else {
     setwd("/home/rstudio/euk/filtered")
-    }
-
+  }
 getwd()
+
+setwd("~/docker/euk/filtered/")
 
 
 ################################################################################
@@ -40,6 +42,7 @@ rR <- sort(list.files(pattern = "_R2_filt.fastq.gz", full.names = TRUE))
 
 
 sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
+sample.names
 
 
 names(rF) <- sample.names
@@ -91,8 +94,12 @@ saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 
 
 ### Assign taxonomy with RDP classifier
+asv.tab.nochim <- readRDS(file = "asv.tab.nochim.rds")
+
 taxa <- assignTaxonomy(asv.tab.nochim,
-                       "/home/rstudio/silva_nr99_v138.1_train_set.fa.gz",
+                       "~/docker/silva/old_silva_nr_v138_train_set.fa.gz",
+                       # "/home/rstudio/silva/old_silva_nr_v138_train_set.fa.gz",
+                       tryRC = TRUE,
                        multithread = TRUE, verbose = TRUE)
 
 
@@ -102,7 +109,7 @@ saveRDS(taxa, "taxa.rds")
 ### Assign taxonomy with IdTaxa
 dna <- DNAStringSet(getSequences(asv.tab.nochim))
 
-load("/home/rstudio/SILVA_SSU_r138_2019.RData")
+load("/home/rstudio/silva/old_SILVA_SSU_r138_2019.RData")
 
 
 ids <- IdTaxa(dna, trainingSet, strand = "top", processors = ncore,
