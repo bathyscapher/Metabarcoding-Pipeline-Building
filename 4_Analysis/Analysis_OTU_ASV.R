@@ -16,9 +16,8 @@ library("vegan")
 
 
 rm(list = ls())
-
-
 setwd("~") # set working directory to home = /home/rstudio
+setwd("~/docker/")
 
 
 ################################################################################
@@ -137,13 +136,31 @@ MetaData <- sample_data(metadata)
 wine <- merge_phyloseq(wine, MetaData)
 
 
+cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
+
+
+### Plot taxa ####
+plot_bar(wine, x = "Phylum") +
+  facet_grid(Domain ~ ., scales = "free_y", space = "free") +
+  geom_bar( stat = "identity",
+           position = "stack") +
+  theme(legend.position = "top", legend.direction = "horizontal") +
+  xlab("") +
+  ylab("Abundance [%]") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  scale_color_manual(values = cols) +
+  scale_fill_manual(values = cols) +
+  coord_flip()
+
+
+
 ## Exploring our data
 nsamples(wine) # number of samples
 ntaxa(wine) # number of taxa
 sample_names(wine)[1:66]
 sample_variables(wine) # metadata variables
 sample_data(wine)
-otu_table(wine)[1:5, 1:5]
+otu_table(wine)[1:4, 1:5]
 tax_table(wine)[1:5, 1:6]
 
 
@@ -200,17 +217,7 @@ if(primer == "18S")
                                                "unclassified_Hexapoda")))
   }
 
-unique(tax_table(wine.s)[, 1])
-
-
-wine.s <- subset_taxa(wine, !(Domain %in% c("unknown") |
-                                Phylum %in% c("Eukaryota_unclassified",
-                                              "Mollusca", "Vertebrata", NA) |
-                                Class %in% c("Insecta", "Ellipura",
-                                             "Embryophyta", "Arachnida",
-                                             "Heterophyidae", "Ichthyophonae",
-                                             "Arthropoda_unclassified",
-                                             "unclassified_Hexapoda")))
+unique(tax_table(wine.s)[, 2])
 
 
 ################################################################################
@@ -255,8 +262,8 @@ wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.000001},
                       prune = TRUE)
 
 ## For 16S ASV
-wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.0001},
-                      prune = TRUE)
+# wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.0001},
+#                       prune = TRUE)
 
 points(rowSums(otu_table(wine.a)), col = "red")
 
@@ -305,7 +312,7 @@ cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
 
 
 ### Plot taxa ####
-plot_bar(wine.a, x = "Phylum", fill = "treatment") +
+plot_bar(wine, x = "Phylum", fill = "treatment") +
   facet_grid(Domain ~ ., scales = "free_y", space = "free") +
   geom_bar(aes(color = treatment, fill = treatment), stat = "identity",
            position = "stack") +
