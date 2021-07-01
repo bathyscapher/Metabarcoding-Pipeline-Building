@@ -45,11 +45,7 @@ Also, download the recreated [SILVA SEED db](https://mothur.s3.us-east-2.amazona
 Herein, the final output is `silva.v138.1_16S-V4.align` to classify the sequences.
 
 The *E. coli* 16S rRNA gene ([NR_024570.1](https://www.ncbi.nlm.nih.gov/nuccore/NR_024570.1/)) was trimmed to the amplified region by the respective primers (i.e. the sequence flanked by the forward and reverse primer). The primers need to be in an [`oligos` file](https://mothur.org/wiki/oligos_file/). For example, the [Earth Microbiome Project 16S primers](https://earthmicrobiome.org/protocols-and-standards/16s/) would look in an `oligos` file as follows:
-```
-forward GTGYCAGCMGCCGCGGTAA
-reverse ATTAGANACCCNNGTAGTCC
-```
-or:
+
 ```
 forward GTGYCAGCMGCCGCGGTAA ATTAGANACCCNNGTAGTCC
 ```
@@ -62,8 +58,8 @@ In `mothur`, run:
 set.current(processors=6)
 set.dir(tempdefault=.)
 pcr.seqs(fasta=e-coli.fasta, oligos=EMP_16S.oligos)
-system(mv e-coli.pcr.fasta e.coli.V4.fasta)
-align.seqs(fasta=e.coli.V4.fasta, reference=../silva.seed_v138_1.align)
+system(command='mv e-coli.pcr.fasta e.coli.V4.fasta')
+align.seqs(fasta=e.coli.V4.fasta, reference=silva.seed_v138_1.align)
 summary.seqs(fasta=e.coli.V4.align)
 ```
 
@@ -79,17 +75,17 @@ Run in `mothur`:
 1. extract the taxonomic information from the header (for some reason, `mothur 1.45.3` refuses to write the file, thus, directly create it in bash ([should work in the next `mothur` version](https://github.com/mothur/mothur/issues/782))):
 ```
 # in mothur
-screen.seqs(fasta=../silva.full_v138.1.fasta, start=13862, end=23444, maxambig=5)
-pcr.seqs(start=13862, end=23444, keepdots=F)
+screen.seqs(fasta=silva.full_v138.1.fasta, start=13862, end=43007, maxambig=5)
+pcr.seqs(start=13862, end=43007, keepdots=F)
 degap.seqs()
 unique.seqs()
 
-system(grep ">" ../silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > ../silva.full_v138.1.good.pcr.ng.unique.accnos)
-get.seqs(fasta=../silva.full_v138.1.good.pcr.fasta, accnos=../silva.full_v138.1.good.pcr.ng.unique.accnos)
-system(command='mv ../silva.full_v138.1.good.pcr.pick.fasta ../silva.v138.1_16S-V4.align')
+system(grep ">" silva.full_v138.1.good.pcr.ng.unique.fasta | cut -f 1 | cut -c 2- > silva.full_v138.1.good.pcr.ng.unique.accnos)
+get.seqs(fasta=silva.full_v138.1.good.pcr.fasta, accnos=silva.full_v138.1.good.pcr.ng.unique.accnos)
+system(command='mv silva.full_v138.1.good.pcr.pick.fasta silva.v138.1_16S-V4.align')
 
 # in bash
-grep '>' ../silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1_16S-V4.full
+grep '>' silva.v138.1_16S-V4.align | cut -f1,3 | cut -f2 -d'>' > silva.v138.1_16S-V4.full
 ```
 
 
