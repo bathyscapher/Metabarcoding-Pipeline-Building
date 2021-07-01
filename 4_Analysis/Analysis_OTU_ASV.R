@@ -2,7 +2,7 @@
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
 ### Analysis of microbiome data
-### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
@@ -152,6 +152,7 @@ tax_table(wine)[1:5, 1:6]
 
 summarize_phyloseq(wine)
 
+
 ## Which taxa do we have in our data? Here on the phlya level:
 get_taxa_unique(wine, taxonomic.rank = rank_names(wine)[2], errorIfNULL = TRUE)
 
@@ -177,35 +178,40 @@ colSums(readsumsdf[, 1, drop = FALSE])
 ################################################################################
 ### Remove spurious taxa ####
 if(primer == "16S")
-{
-  wine.s <- subset_taxa(wine, !(Domain %in% c("unknown", "Eukaryota") |
-                                  Phylum %in% c("Eukaryota_unclassified", NA) |
-                                  Order %in% c("Chloroplast") |
-                                  Family %in% c("Mitochondria")))
-}
+  {
+    wine.s <- subset_taxa(wine, !(Domain %in% c("unknown", "Eukaryota") |
+                                    Phylum %in% c("Eukaryota_unclassified",
+                                                  NA) |
+                                    Order %in% c("Chloroplast") |
+                                    Family %in% c("Mitochondria")))
+  }
 
 if(primer == "18S")
-{
-  wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
-                                  Phylum %in% c("Eukaryota_unclassified",
-                                                "Mollusca", "Vertebrata", NA) |
-                                  Class %in% c("Insecta", "Ellipura",
-                                               "Embryophyta", "Arachnida",
-                                               "Heterophyidae", "Ichthyophonae",
-                                               "Arthropoda_unclassified",
-                                               "unclassified_Hexapoda")))
-}
+  {
+    wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
+                                    Phylum %in% c("Eukaryota_unclassified",
+                                                  "Mollusca", "Vertebrata",
+                                                  NA) |
+                                    Class %in% c("Insecta", "Ellipura",
+                                                 "Embryophyta", "Arachnida",
+                                                 "Heterophyidae",
+                                                 "Ichthyophonae",
+                                                 "Arthropoda_unclassified",
+                                                 "unclassified_Hexapoda")))
+  }
+
 
 wine
 wine.s
 
+
 ################################################################################
 ### Check for empty taxa and remove if any ####
 if(any(taxa_sums(wine.s) == 0))
-{
-  sum(taxa_sums(wine.s) == 0)
-  wine <- prune_taxa(taxa_sums(wine.s) > 0, wine.s)
-}
+  {
+    sum(taxa_sums(wine.s) == 0)
+    wine <- prune_taxa(taxa_sums(wine.s) > 0, wine.s)
+  }
 
 
 ## Check sample_sums (to check if we should remove a sample with a very low
@@ -240,10 +246,10 @@ points(rowSums(otu_table(wine.a)), col = "red")
 
 
 if(any(taxa_sums(wine) == 0))
-{
-  sum(taxa_sums(wine) == 0)
-  wine <- prune_taxa(taxa_sums(wine) > 0, wine)
-}
+  {
+    sum(taxa_sums(wine) == 0)
+    wine <- prune_taxa(taxa_sums(wine) > 0, wine)
+  }
 
 
 wine.s
@@ -293,14 +299,15 @@ plot_bar(wine.a, x = "Phylum", fill = "treatment") +
   coord_flip()
 
 
-### plot rank abundance of Orders ####
+### Plot rank abundance of Orders ####
 colnames(tax_table(wine.a)) # print the available taxonomic ranks
 wine.ord <- aggregate_taxa(wine.a, "Order")
 
+
 par(mar = c(10, 4, 4, 2) + 0.1)  # make more room on bottom margin
 N <- 20 #show the top20 abundant Orders
-barplot(sort(taxa_sums(wine.ord), TRUE)[1:N]/nsamples(wine.ord),
-        main="Relative abundance of top 20 most abundant Orders",
+barplot(sort(taxa_sums(wine.ord), TRUE)[1:N] / nsamples(wine.ord),
+        main = "Relative abundance of top 20 most abundant Orders",
         las = 2)
 
 
@@ -448,7 +455,7 @@ ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = treatment)) +
 ### Community composition ####
 wine.a
 
-## with relative abundance data
+## With relative abundance data
 otu_table(wine.a)[1:5, 1:5]
 
 
@@ -521,7 +528,7 @@ plot_ordination(wine.a.out, p_nmds, color = "treatment",
 ### Constrained ordination ####
 ## RDA
 
-# CAP (dbRDA) ordinate ####
+## CAP (dbRDA) ordinate ####
 cap_ord <- ordinate(
   physeq = wine.a,
   method = "CAP",
@@ -535,17 +542,19 @@ screeplot(cap_ord) # visualisation of explained variation by axes
 RsquareAdj(cap_ord)
 
 
-# CAP plot ####
+## CAP plot ####
 cap_plot <- plot_ordination(
   physeq = wine.a,
   ordination = cap_ord,
   color = "treatment",
   shape = "treatment",
   axes = c(1,2))
-cap_plot = cap_plot + geom_point(size = 4) + ggtitle() +
-  scale_shape_manual(values=c(18, 16, 17))+
+cap_plot = cap_plot +
+  geom_point(size = 4) +
+  ggtitle() +
+  scale_shape_manual(values = c(18, 16, 17)) +
   scale_color_manual(values=c('#996600','#CCCC00', '#66CC33', "#667C33"))
-#  geom_text(aes(label=sample_data(ps)$vineyard), color = "black", size = 2.5)
+# geom_text(aes(label=sample_data(ps)$vineyard), color = "black", size = 2.5)
 
 cap_plot
 
@@ -573,6 +582,7 @@ label_map <- aes(x = 1.3 * CAP1,
 
 arrowhead = arrow(length = unit(0.02, "npc"))
 
+
 # Make a new graphic
 p <- cap_plot +
   geom_segment(
@@ -588,116 +598,112 @@ p <- cap_plot +
     data = arrowdf,
     show.legend = FALSE
   ) +
-  geom_hline(yintercept=0, linetype="dotted") +
-  geom_vline(xintercept=0, linetype="dotted") +
-  theme_bw()
-
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dotted")
 p
 
-###  The core microbiome - common core across all treatments ####
 
+### The core microbiome - common core across all treatments ####
 wine.core <- core(wine.a, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 90 % of the samples
 summarize_phyloseq(wine.core)
 summarize_phyloseq(wine.a)
 
 
-# percentage of core n_taxa compared to full dataset
-ntaxa(wine.core)/ntaxa(wine.a)*100
+## Percentage of core n_taxa compared to full dataset
+ntaxa(wine.core) / ntaxa(wine.a) * 100
 
 
-# plot Venn Diagrams
+## Plot Venn Diagrams
 library("VennDiagram")
 
-# prepare datasets for VennDiagramm
-#Bare ground
+## Prepare datasets for VennDiagramm
+## Bare ground
 all.BG <- subset_samples(wine.a, treatment == "BareGround") # select bare ground samples
 any(taxa_sums(all.BG) == 0) # OTUs with abundance 0
-all.BG = prune_taxa(taxa_sums(all.BG) > 0, all.BG) # only keep OTUs lager >0
+all.BG <- prune_taxa(taxa_sums(all.BG) > 0, all.BG) # only keep OTUs lager >0
 wine.BG <- row.names(tax_table(all.BG))
 
-# Alternating cover
+
+## Alternating cover
 all.AC <- subset_samples(wine.a, treatment == "AlternatingCover") # select bare ground samples
 any(taxa_sums(all.AC) == 0) # OTUs with abundance 0
-all.AC = prune_taxa(taxa_sums(all.AC) > 0, all.AC) # only keep OTUs lager >0
+all.AC <- prune_taxa(taxa_sums(all.AC) > 0, all.AC) # only keep OTUs >0
 wine.AC <- row.names(tax_table(all.AC))
 
-# Complete cover
+
+## Complete cover
 all.CC <- subset_samples(wine.a, treatment == "CompleteCover") # select bare ground samples
 any(taxa_sums(all.CC) == 0) # OTUs with abundance 0
-all.CC = prune_taxa(taxa_sums(all.CC) > 0, all.CC) # only keep OTUs lager >0
+all.CC <- prune_taxa(taxa_sums(all.CC) > 0, all.CC) # only keep OTUs >0
 wine.CC <- row.names(tax_table(all.CC))
 
-all=list(wine.BG, wine.AC, wine.CC)
+all <- list(wine.BG, wine.AC, wine.CC)
 
-# VennDiagram for all OTUs
-venn.diagram(
+## VennDiagram for all OTUs
+plt <- venn.diagram(
   all,
   category.names = c("Bare ground" , "Alternating cover" , "Complete cover"),
-  filename = 'Venn_all.png',
-  output=TRUE
-)
+  filename = NULL)
+grid::grid.draw(plt)
 
-# prepare datasets for VennDiagram with core microbiome per treatment
-#Bare ground
+
+## Prepare datasets for VennDiagram with core microbiome per treatment
+## Bare ground
 BG <- subset_samples(wine.a, treatment == "BareGround") # select bare ground samples
 core.BG <- wine.core <- core(BG, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 95% of the samples
-core.BG = prune_taxa(taxa_sums(core.BG) > 0, core.BG) # only keep OTUs lager >0
+core.BG <- prune_taxa(taxa_sums(core.BG) > 0, core.BG) # only keep OTUs >0
 core.BG <- row.names(tax_table(core.BG))
 
-# Alternating cover
+
+## Alternating cover
 AC <- subset_samples(wine.a, treatment == "AlternatingCover") # select bare ground samples
 core.AC <- wine.core <- core(AC, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 95% of the samples
-core.AC = prune_taxa(taxa_sums(core.AC) > 0, core.AC) # only keep OTUs lager >0
+core.AC <- prune_taxa(taxa_sums(core.AC) > 0, core.AC) # only keep OTUs >0
 core.AC <- row.names(tax_table(core.AC))
 
-# Complete cover
+
+## Complete cover
 CC <- subset_samples(wine.a, treatment == "CompleteCover") # select bare ground samples
 core.CC <- wine.core <- core(CC, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 95% of the samples
-core.CC = prune_taxa(taxa_sums(core.CC) > 0, core.CC) # only keep OTUs lager >0
+core.CC <- prune_taxa(taxa_sums(core.CC) > 0, core.CC) # only keep OTUs >0
 core.CC <- row.names(tax_table(core.CC))
 
-core=list(core.BG, core.AC, core.CC)
+core <- list(core.BG, core.AC, core.CC)
 
 
-# Chart
-venn.diagram(
+## Chart
+plt <- venn.diagram(
   core,
   category.names = c("Bare ground" , "Alternating cover" , "Complete cover"),
-  filename = 'Venn_corepertrtm.png',
-  output=TRUE
-)
+  filename = NULL)
+grid::grid.draw(plt)
+
 
 ####
-venn.diagram(
-  core,
-  category.names = c("Bare ground" , "Alternating cover" , "Complete cover"),
-  filename = 'Venn_coreptrtm_col.png',
-  output=TRUE,
+dev.off()
 
-  # Output features
-  imagetype="png" ,
-  height = 800 ,
-  width = 800 ,
-  resolution = 300,
-  compression = "lzw",
 
-  # Circles
-  lwd = 2,
-  lty = 'blank',
-  fill = cols,
+plt <- venn.diagram(core,
+                    category.names = c("Bare ground" , "Alternating cover" ,
+                                       "Complete cover"),
+                    filename = NULL,
 
-  # Numbers
-  cex = .6,
-  fontface = "bold",
-  fontfamily = "sans",
+                    # Circles
+                    lwd = 2,
+                    lty = 'blank',
+                    fill = cols,
 
-  # Set names
-  cat.cex = 0.6,
-  cat.fontface = "bold",
-  cat.default.pos = "outer",
-  cat.pos = c(-27, 27, 135),
-  cat.dist = c(0.055, 0.055, 0.085),
-  cat.fontfamily = "sans",
-  rotation = 1
-)
+                    # Numbers
+                    cex = .6,
+                    fontface = "bold",
+                    fontfamily = "sans",
 
+                    # Set names
+                    cat.cex = 0.6,
+                    cat.fontface = "bold",
+                    cat.default.pos = "outer",
+                    cat.pos = c(-27, 27, 135),
+                    cat.dist = c(0.055, 0.055, 0.085),
+                    cat.fontfamily = "sans",
+                    rotation = 1)
+grid::grid.draw(plt)
