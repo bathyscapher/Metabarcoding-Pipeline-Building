@@ -6,8 +6,8 @@ Generally following the [dada2 tutorial](https://benjjneb.github.io/dada2/tutori
 1. Merge reads
 1. Construct ASV table
 1. Remove chimeras
-1. Track reads
 1. Assign taxonomy (RDP classifier and IdTaxa)
+1. Track reads
 
 
 ## dada2 pipeline
@@ -17,29 +17,35 @@ library("dada2")
 library("DECIPHER")
 
 rm(list = ls())
-setwd("...")
 
 ncore <- 6
 ```
 
+
+## Choose pro- or eukaryotes
+```
+primer <- "16S"
+# primer <- "18S"
+
+
+if (primer == "16S") {
+  setwd("/home/rstudio/prok/filtered/")
+  } else {
+    setwd("/home/rstudio/euk/filtered")
+  }
+getwd()
+```
 
 ## List fastq files
 List all `*.fastq.gz` files in the working directory and get the sample names.
 ```R
 list.files(pattern = "fastq.gz")
 
-rF <- sort(list.files(pattern = "_R1.fastq.gz", full.names = TRUE))
-rR <- sort(list.files(pattern = "_R2.fastq.gz", full.names = TRUE))
+rF <- sort(list.files(pattern = "_R1_filt.fastq.gz", full.names = TRUE))
+rR <- sort(list.files(pattern = "_R2_filt.fastq.gz", full.names = TRUE))
 
 sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
-
-### 16S
-rF.f <- file.path("filtered", paste0(sample.names, "_16S_R1_filt.fastq.gz"))
-rR.f <- file.path("filtered", paste0(sample.names, "_16S_R2_filt.fastq.gz"))
-
-### 18S
-rF.f <- file.path("filtered", paste0(sample.names, "_18S_R1_filt.fastq.gz"))
-rR.f <- file.path("filtered", paste0(sample.names, "_18S_R2_filt.fastq.gz"))
+sample.names
 
 names(rF.f) <- sample.names
 names(rR.f) <- sample.names
@@ -49,8 +55,8 @@ names(rR.f) <- sample.names
 ## Error rates
 Estimate and plot the error rates.
 ```
-errF <- learnErrors(rF.f, multithread = ncore)
-errR <- learnErrors(rR.f, multithread = ncore)
+errF <- learnErrors(rF, multithread = ncore)
+errR <- learnErrors(rR, multithread = ncore)
 
 plotErrors(errF, nominalQ = TRUE)
 plotErrors(errR, nominalQ = TRUE)
@@ -62,8 +68,8 @@ plotErrors(errR, nominalQ = TRUE)
 
 ## Core sample inference algorithm
 ```R
-dadaF <- dada(rF.f, err = errF, multithread = ncore)
-dadaR <- dada(rR.f, err = errR, multithread = ncore)
+dadaF <- dada(rF, err = errF, multithread = ncore, verbose = TRUE)
+dadaR <- dada(rR, err = errR, multithread = ncore, verbose = TRUE)
 ```
 
 Save intermediate results.
@@ -75,7 +81,7 @@ saveRDS(dadaR, "dadaR.rds")
 
 ## Merge paired reads
 ```R
-contigs <- mergePairs(dadaF, rF.f, dadaR, rR.f, verbose = TRUE)
+contigs <- mergePairs(dadaF, rF, dadaR, rR, verbose = TRUE)
 head(contigs[[1]])
 
 saveRDS(contigs, "contigs.rds")
@@ -96,8 +102,9 @@ table(nchar(getSequences(asv.tab)))
 asv.tab.nochim <- removeBimeraDenovo(asv.tab, method = "consensus",
                                      multithread = ncore, verbose = TRUE)
 dim(asv.tab.nochim)
-
 sum(asv.tab.nochim) / sum(asv.tab)
+
+table(nchar(getSequences(asv.tab.nochim)))
 
 saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 ```
@@ -107,24 +114,37 @@ Convert the chimera-free sequences into a `DNAStringSet`, load the SILVA db and 
 
 ### RDP classifier
 ```R
-taxa <- assignTaxonomy(asv.tab.nochim,
-                       "silva_nr99_v138.1_train_set.fa.gz",
-                       multithread = TRUE, verbose = TRUE)
+asv.tab.nochim <- readRDS(file = "asv.tab.nochim.rds")
 
+taxa <- assignTaxonomy(asv.tab.nochim, "silva_nr99_v138.1_train_set.fa.gz",
+                       multithread = TRUE, verbose = TRUE)
 
 saveRDS(taxa, "taxa.rds")
 ```
+
+
+### Add species
+```R
+taxa.species <- assignSpecies(taxa,
+                              "silva_species_assignment_v138.1.fa.gz",
+                              verbose = TRUE)
+
+saveRDS(taxa.species, "taxa.species.rds")
+```
+
 
 ### IdTaxa
 
 ```R
 dna <- DNAStringSet(getSequences(asv.tab.nochim))
 
-load("SILVA_SSU_r132_March2018.RData")
+load("/home/rstudio/silva/old_SILVA_SSU_r138_2019.RData")
+
 
 ids <- IdTaxa(dna, trainingSet, strand = "top", processors = ncore,
               verbose = TRUE)
 ranks <- c("domain", "phylum", "class", "order", "family", "genus", "species")
+
 
 ## Convert output object of class "Taxa"
 taxa.id <- t(sapply(ids, function(x) {
@@ -132,10 +152,12 @@ taxa.id <- t(sapply(ids, function(x) {
   taxa <- x$taxon[m]
   # taxa[startsWith(taxa, "unclassified_")] <- NA
   taxa
-  }))
+}))
+
 
 colnames(taxa.id) <- ranks
 rownames(taxa.id) <- getSequences(asv.tab.nochim)
+
 
 saveRDS(taxa.id, "taxa.id.rds")
 ```

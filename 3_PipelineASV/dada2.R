@@ -17,8 +17,8 @@ rm(list = ls())
 
 
 ## Choose pro- or eukaryotes
-# primer <- "16S"
-primer <- "18S"
+primer <- "16S"
+# primer <- "18S"
 
 
 if (primer == "16S") {
@@ -27,8 +27,6 @@ if (primer == "16S") {
     setwd("/home/rstudio/euk/filtered")
   }
 getwd()
-
-setwd("~/docker/euk/filtered/")
 
 
 ################################################################################
@@ -97,13 +95,20 @@ saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 asv.tab.nochim <- readRDS(file = "asv.tab.nochim.rds")
 
 taxa <- assignTaxonomy(asv.tab.nochim,
-                       "~/docker/silva/old_silva_nr_v138_train_set.fa.gz",
-                       # "/home/rstudio/silva/old_silva_nr_v138_train_set.fa.gz",
-                       tryRC = TRUE,
+                       # "~/docker/silva/old_silva_nr_v138_train_set.fa.gz",
+                       "/mothur/refs/silva_nr99_v138.1_train_set.fa.gz",
+                       # tryRC = TRUE,
                        multithread = TRUE, verbose = TRUE)
 
 
 saveRDS(taxa, "taxa.rds")
+
+
+### Add species
+taxa.species <- assignSpecies(taxa,
+                              "/home/rstudio/silva/silva_species_assignment_v138.1.fa.gz")
+
+saveRDS(taxa.species, "taxa.species.rds")
 
 
 ### Assign taxonomy with IdTaxa
