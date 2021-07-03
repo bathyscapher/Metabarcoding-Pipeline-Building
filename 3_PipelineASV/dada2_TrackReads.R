@@ -1,21 +1,20 @@
 ################################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
-### Quality filtering with dada2
-### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
+### Track reads of DADA2 pipeline
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
 
 
+library("dada2")
 library("reshape2")
 library("ggplot2")
 
 
 rm(list = ls())
-
-
-setwd("/scratch/mpb/")
+setwd("/home/rstudio/")
 
 
 ################################################################################
@@ -25,7 +24,7 @@ getN <- function(x) {
 }
 
 
-rF <- sort(list.files(path = "prok", pattern = "_R1_filt.fastq.gz",
+rF <- sort(list.files(path = "prok/filtered/", pattern = "_R1_filt.fastq.gz",
                       full.names = TRUE))
 sample.names <- sapply(strsplit(basename(rF), "_"), `[`, 1)
 
