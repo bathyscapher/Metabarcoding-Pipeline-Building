@@ -78,7 +78,6 @@ ggplot(data = track.cS.m, aes(x = dada2, y = log(Reads), color = Primer)) +
   geom_point() +
   facet_grid( ~ Primer) +
   theme(legend.position = "top", legend.direction = "horizontal",
-        # legend.title = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab("") +
   theme_bw()
