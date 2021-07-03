@@ -96,9 +96,8 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
 
 ################################################################################
 ### Read taxa into phyloseq object ####
-## Note: for now choose RDP for OTU, DECIPHER for ASV
-method <- "ASV"
-primer <- "18S"
+method <- "OTU"
+primer <- "16S"
 classifier <- "RDP"
 # classifier <- "DECIPHER"
 
@@ -121,6 +120,7 @@ head(metadata)
 metadata$treatment[metadata$treatment == 'AC'] <- 'AlternatingCover'
 metadata$treatment[metadata$treatment == 'BG'] <- 'BareGround'
 metadata$treatment[metadata$treatment == 'CC'] <- 'CompleteCover'
+
 
 ## Code vineyard names as factors
 metadata$treatment <- as.factor(metadata$treatment)
@@ -185,6 +185,7 @@ if(primer == "16S")
                                   Order %in% c("Chloroplast") |
                                   Family %in% c("Mitochondria")))
   }
+
 
 if(primer == "18S")
   {
@@ -302,7 +303,7 @@ wine.ord <- aggregate_taxa(wine.a, "Order")
 
 
 par(mar = c(10, 4, 4, 2) + 0.1)  # make more room on bottom margin
-N <- 20 #show the top20 abundant Orders
+N <- 20 # show the top20 abundant Orders
 barplot(sort(taxa_sums(wine.ord), TRUE)[1:N] / nsamples(wine.ord),
         main = "Relative abundance of top 20 most abundant Orders",
         las = 2)
@@ -319,21 +320,21 @@ write.table((sample_data(wine.a)), "wine.a_meta.csv", col.names = NA,
             row.names = TRUE, sep = ",")
 
 
-## Extract OTU table with taxonomic annotation
+## Extract OTU table with taxonomic annotation into a data.frame
 tax <- as.data.frame(wine.a@tax_table@.Data)
 otu <- as.data.frame(t(otu_table(wine.a)))
 
 tax.otu <- merge(tax, otu, by = 0, all = TRUE) # by = 0 = by rownames
 rownames(tax.otu) <- tax.otu$Row.names
 tax.otu$Row.names <- NULL
-head(tax.otu)
+tax.otu[1:5, 1:10]
 
 rm(tax, otu)
 
 
 ### Alpha diversity with untransformed data
 ## Look at alpha diversity indices
-# rarified data
+## Rarified data
 
 plot_richness(wine.r, measures = c("Observed", "Shannon", "Chao1")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
@@ -341,7 +342,7 @@ plot_richness(wine.r, measures = c("Observed", "Shannon", "Chao1")) +
   xlab("Samples")
 
 
-# Or like this
+# Or by treatment
 plot_richness(wine.r, x = "ord.treatment",
               measures = c("Observed", "Shannon", "Chao1"),
               color = "treatment") +
@@ -389,11 +390,13 @@ ggplot(reg.df, aes(x = ord.treatment, y = Observed, color = treatment)) +
   ylab(expression(alpha-diversity)) +
   xlab("")
 
-# set treatment variable as.factor
+
+## Set treatment variable as.factor
 reg.df$treatment <- as.factor(reg.df$treatment)
 str(reg.df)
  
-# relevel default reference for comparison "BareGround"
+
+## Relevel default reference for comparison "BareGround"
 reg.df <- within(reg.df, treatment <- relevel(treatment, ref = "BareGround"))
 
 
@@ -411,9 +414,11 @@ m2 <- lmer(Observed ~ treatment + scale(Cu) +
              (1|vineyard) , data = reg.df, REML = FALSE, na.action = "na.fail")
 summary(m2) 
 
+
 m3 <- lmer(Observed ~ treatment + scale(som) + scale(Cu) + scale(plant_spec) +
              (1|vineyard) , data = reg.df, REML = FALSE, na.action = "na.fail")
 summary(m3) 
+
 
 ## Model comparison
 library("car")
@@ -453,6 +458,7 @@ ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = ord.treatment)) +
 ################################################################################
 ### Community composition ####
 wine.a
+
 
 ## With relative abundance data
 otu_table(wine.a)[1:5, 1:5]
@@ -561,7 +567,8 @@ cap_plot <- plot_ordination(
 
 cap_plot
 
-# customize your plot
+
+## Customize your plot
 cap_plot = cap_plot + geom_point(size = 4) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = c(18, 16, 17)) +
@@ -570,13 +577,13 @@ cap_plot = cap_plot + geom_point(size = 4) +
   
 cap_plot
 
-# Now add the environmental variables as arrows
+## Now add the environmental variables as arrows
 arrowmat <- vegan::scores(cap_ord, display = "bp")
 
-# Add labels, make a data.frame
+## Add labels, make a data.frame
 arrowdf <- data.frame(labels = rownames(arrowmat), arrowmat)
 
-# Define the arrow aesthetic mapping
+## Define the arrow aesthetic mapping
 arrow_map <- aes(xend = CAP1,
                  yend = CAP2,
                  x = 0,
@@ -624,14 +631,15 @@ summarize_phyloseq(wine.a)
 ntaxa(wine.core) / ntaxa(wine.a) * 100
 
 
-## Plot Venn Diagrams
+### Plot Venn Diagrams ###
 library("VennDiagram")
+
 
 ## Prepare datasets for VennDiagramm
 ## Bare ground
 all.BG <- subset_samples(wine.a, treatment == "BareGround") # select bare ground samples
 any(taxa_sums(all.BG) == 0) # OTUs with abundance 0
-all.BG <- prune_taxa(taxa_sums(all.BG) > 0, all.BG) # only keep OTUs lager >0
+all.BG <- prune_taxa(taxa_sums(all.BG) > 0, all.BG) # only keep OTUs >0
 wine.BG <- row.names(tax_table(all.BG))
 
 
@@ -649,6 +657,7 @@ all.CC <- prune_taxa(taxa_sums(all.CC) > 0, all.CC) # only keep OTUs >0
 wine.CC <- row.names(tax_table(all.CC))
 
 all <- list(wine.BG, wine.AC, wine.CC)
+
 
 ## VennDiagram for all OTUs
 dev.off()
@@ -720,3 +729,7 @@ plt <- venn.diagram(core,
                     cat.fontfamily = "sans",
                     rotation = 1)
 grid::grid.draw(plt)
+
+
+################################################################################
+################################################################################
