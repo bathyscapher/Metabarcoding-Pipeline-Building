@@ -59,19 +59,64 @@ cd /mothur/refs
 wget https://zenodo.org/record/4587955/files/silva_species_assignment_v138.1.fa.gz
 ```
 
-### FASTQ files
-The data are hosted on a private NextCloud server (access will be provided only during the workshop). `<share id>` is the string after the s/ and before the /download in the link.
+
+## Handle files
+Bash supports any file handling.
+
+1. First, navigate to the home directory
+1. Create a directory
+1. Enter this directory
+1. Create a text file with the text editor [vim](https://github.com/vim/vim) and write some text into it (first, press 'i' to start editing mode, write the text, press `ESC` to return to normal mode, type `:x!` to safe and exit vim.
+1. Use `more` or...
+1. ... `head` to show the content of a file
+1. Copy the file
+1. To append text to a file use `echo` and `>>`
+1. Show content of both files
+1. Delete the first file
+1. Navigate back to `home` ...
+1. ... and delete the directory `test`
+
 ```
-curl -u "shareid:password" -H 'X-Requested-With: XMLHttpRequest' 'https://nextcloud.somedomain.com/public.php/webdav/'
+cd
+mkdir test
+cd test
+vim testi.test
+more testi.test
+head testi.test
+cp testi.test another.test
+echo 'Some more text' >> testi.test
+more *test
+rm testi.test
+cd
+rm -rf test
 ```
+
+Now, let's have a look at a bit more complex files.
+
+1. Starting in `home`,
+1. copy a *tar.gz file to home and ...
+1. ... look into it
+1. Extract and ...
+1. list files
+1. Look into the extracted files
+1. Delete these files again
+
+```
+cd
+cp ...tar.gz ~
+more ...tar.gz
+tar xzvf ...targ.z
+ll
+more ...*
+rm ...
+```
+
 
 ## Help
 Each bash command has a help page:
 ```
 man R
 ```
-
-
 
 
 
