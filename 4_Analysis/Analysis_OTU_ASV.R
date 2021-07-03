@@ -13,14 +13,11 @@ library("ggplot2")
 theme_set(theme_bw(base_size = 20) +
             theme(rect = element_rect(fill = "transparent")))
 library("vegan")
-#library(devtools) # Load the devtools package
 library("microbiome")
 
+
 rm(list = ls())
-
-
-setwd("C:/Users/Steima/Seafile/My Library/Doctoral school CUSO/Cuso organising a course/2020/Workshop-Analysis/") # set working directory to home
-setwd("~/docker/")
+setwd("/home/rstudio/")
 
 
 ################################################################################
@@ -91,7 +88,7 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
   
   ### Transpose (sometimes the OTU table is transposed... :-|)
   if (taxa_are_rows(wine))
-  {otu_table(wine) <- t(otu_table(wine))}
+    {otu_table(wine) <- t(otu_table(wine))}
   
   return(wine)
 }
@@ -100,8 +97,8 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
 ################################################################################
 ### Read taxa into phyloseq object ####
 ## Note: for now choose RDP for OTU, DECIPHER for ASV
-method <- "OTU"
-primer <- "16S"
+method <- "ASV"
+primer <- "18S"
 classifier <- "RDP"
 # classifier <- "DECIPHER"
 
@@ -134,8 +131,8 @@ metadata$ord.treatment <- factor(metadata$treatment)
 levels(metadata$ord.treatment) <- c("AlternatingCover", "BareGround",
                                   "CompleteCover")
 metadata$ord.treatment <- ordered(metadata$ord.treatment,
-                              levels = c("BareGround", "AlternatingCover",
-                                         "CompleteCover"))
+                                  levels = c("BareGround", "AlternatingCover",
+                                             "CompleteCover"))
 
 
 MetaData <- sample_data(metadata)
@@ -151,12 +148,12 @@ sample_data(wine)
 otu_table(wine)[1:5, 1:5]
 tax_table(wine)[1:5, 1:6]
 
-# OR
 
+# OR
 summarize_phyloseq(wine)
 
 
-## Which taxa do we have in our data? Here on the phlya level:
+## Which taxa do we have in our data? Here on the phyla level:
 get_taxa_unique(wine, taxonomic.rank = rank_names(wine)[2], errorIfNULL = TRUE)
 
 
@@ -181,16 +178,16 @@ colSums(readsumsdf[, 1, drop = FALSE])
 ################################################################################
 ### Remove spurious taxa ####
 if(primer == "16S")
-{
+  {
   wine.s <- subset_taxa(wine, !(Domain %in% c("unknown", "Eukaryota") |
                                   Phylum %in% c("Eukaryota_unclassified",
                                                 NA) |
                                   Order %in% c("Chloroplast") |
                                   Family %in% c("Mitochondria")))
-}
+  }
 
 if(primer == "18S")
-{
+  {
   wine.s <- subset_taxa(wine, !(Domain %in% c("Bacteria", "unknown") |
                                   Phylum %in% c("Eukaryota_unclassified",
                                                 "Mollusca", "Vertebrata",
@@ -201,7 +198,7 @@ if(primer == "18S")
                                                "Ichthyophonae",
                                                "Arthropoda_unclassified",
                                                "unclassified_Hexapoda")))
-}
+  }
 
 
 wine
@@ -210,11 +207,10 @@ wine.s
 
 ################################################################################
 ### Check for empty taxa and remove if any ####
+sum(taxa_sums(wine.s) == 0)
+
 if(any(taxa_sums(wine.s) == 0))
-{
-  sum(taxa_sums(wine.s) == 0)
-  wine <- prune_taxa(taxa_sums(wine.s) > 0, wine.s)
-}
+  {wine <- prune_taxa(taxa_sums(wine.s) > 0, wine.s)}
 
 
 ## Check sample_sums (to check if we should remove a sample with a very low
@@ -231,11 +227,11 @@ summary(sums) # looks good no sample should be removed
 set.seed(100)
 wine.r <- rarefy_even_depth(wine)
 wine.r
-wine
+wine.s
 
 
 ################################################################################
-### Percentual abundance ####
+### Percentage abundance ####
 wine.s <- transform_sample_counts(wine.s, function(otu) {otu / sum(otu)})
 plot(rowSums(otu_table(wine.s)), ylim = c(0, 1),
      xlab = "Samples", ylab = "Abundance [%]") # 100 % in all samples
@@ -243,16 +239,14 @@ plot(rowSums(otu_table(wine.s)), ylim = c(0, 1),
 
 ################################################################################
 ### Abundance filtering ####
-wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.0001},
+wine.a <- filter_taxa(wine.s, function(otu) {mean(otu) > 0.00001},
                       prune = TRUE)
 points(rowSums(otu_table(wine.a)), col = "red")
 
 
+sum(taxa_sums(wine) == 0)
 if(any(taxa_sums(wine) == 0))
-{
-  sum(taxa_sums(wine) == 0)
-  wine <- prune_taxa(taxa_sums(wine) > 0, wine)
-}
+  {wine <- prune_taxa(taxa_sums(wine) > 0, wine)}
 
 
 wine.s
