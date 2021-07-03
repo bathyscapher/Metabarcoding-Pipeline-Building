@@ -17,8 +17,8 @@ rm(list = ls())
 
 
 ## Choose pro- or eukaryotes
-# primer <- "16S"
-primer <- "18S"
+primer <- "16S"
+# primer <- "18S"
 
 
 if (primer == "16S") {
@@ -58,10 +58,8 @@ if (primer == "16S") {
   FWD <- "GTGYCAGCMGCCGCGGTAA" # 515FB
   REV <- "GGACTACNVGGGTWTCTAAT" # 806RB
   } else {
-  # FWD <- "GTACACACCGCCCGTC" # Euk_1391f
-  # REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
-    FWD <- "CGGTAAYTCCAGCTCYV" # smp
-    REV <- "CCGTCAATTHCTTYAART" # smp
+    FWD <- "GTACACACCGCCCGTC" # Euk_1391f
+    REV <- "TGATCCTTCYGCAGGTTCACCTAC" # EukBr Variant
   }
 
 
@@ -91,9 +89,7 @@ cutadapt <- "/usr/local/bin/cutadapt"
 
 path.cut <- file.path(".", "cutPrimers")
 if(!dir.exists(path.cut))
-  {
-    dir.create(path.cut)
-  }
+  {dir.create(path.cut)}
 
 rF.cut <- file.path(path.cut, basename(rF.fN))
 rR.cut <- file.path(path.cut, basename(rR.fN))
@@ -151,6 +147,9 @@ FASTQ.f <- filterAndTrim(rF.fN, rF.cut.f, rR.fN, rR.cut.f,
                          truncQ = 2, rm.phix = TRUE,
                          compress = TRUE, multithread = ncore, verbose = TRUE)
 head(FASTQ.f)
+
+
+saveRDS(FASTQ.f, "FASTQ.f.rds")
 
 
 ### Plot quality profiles exemplarily
