@@ -78,7 +78,7 @@ get.current()
 Screen once more to ensure that all sequences overlap the same region.
 ```bash
 ### 16S
-screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=9582)
+screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=8, end=11570)
 
 ### 18S
 screen.seqs(fasta=wine.trim.contigs.good.unique.align, count=wine.trim.contigs.good.count_table, summary=wine.trim.contigs.good.unique.summary, start=4, end=562)
@@ -92,7 +92,7 @@ filter.seqs(fasta=wine.trim.contigs.good.unique.good.align, vertical=T, trump=.)
 unique.seqs(fasta=wine.trim.contigs.good.unique.good.filter.fasta, count=wine.trim.contigs.good.good.count_table)
 
 summary.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.fasta, count=wine.trim.contigs.good.unique.good.filter.count_table)
-system(rm -f wine.filter)
+system(command='rm -f wine.filter')
 ```
 
 ### Precluster sequences
@@ -147,7 +147,7 @@ get.current()
 ```
 
 ### Classify OTUs
-Find consensus taxonomy for an OTU. **SKIEPPED THIS PART AS THE LIST FILE IS MISSING**
+Find consensus taxonomy for an OTU. **SKIPPED THIS PART AS THE LIST FILE IS MISSING**
 ```bash
 ### 16S
 #classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_16S-V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
