@@ -1,8 +1,8 @@
 ################################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
-### mothur pipeline OTU: Count reads loss in pipeline
-### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
+### mothur pipeline OTU: Count read loss along pipeline
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
@@ -13,18 +13,29 @@
 
 
 library("ggplot2")
-  theme_set(theme_bw(base_size = 12))
+theme_set(theme_bw(base_size = 12))
 library("reshape2")
 
 
 rm(list = ls())
 
 
-setwd("/scratch/mpb/euk/filtered/")
+## Choose pro- or eukaryotes
+primer <- "16S"
+# primer <- "18S"
+
+
+if (primer == "16S") {
+  setwd("/home/rstudio/prok/filtered/")
+} else {
+  setwd("/home/rstudio/euk/filtered")
+}
+getwd()
+
 
 
 ################################################################################
-reads <- read.table("countReadsMothur.csv", sep = "\t", header = TRUE)
+reads <- read.table("countReads.csv", sep = "\t", header = TRUE)
 reads <- reads[-1, ] # delete empty line
 reads$mothur <- as.factor(reads$mothur)
 

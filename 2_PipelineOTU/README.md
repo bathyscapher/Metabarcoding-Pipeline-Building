@@ -210,8 +210,8 @@ Further process them with [this R script](mothur_RarefactionCurves.R).
 ### Track reads
 Survey where the reads are 'lost' in the pipeline.
 ```bash
-awk -f /home/rstudio/Metabarcoding-Pipeline-Building/2/transposeList2Table.awk <(
-grep 'mothur > \|# of' mothur.*.logfile | grep '# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos' | sed -r 's/mothur > /mothur: /' | sed -r 's/mothur/\nmothur/' | sed -r 's/\t/ /' | sed -r 's/#/Number/') > countReads
+awk -f /home/rstudio/Metabarcoding-Pipeline-Building/2_PipelineOTU/transposeList2Table.awk <(
+grep 'mothur > \|# of' mothur.*.logfile | grep '# of\|make.contigs\|screen.seqs\|align.seqs\|filter.seqs\|pre.cluster\|chimera.vsearch\|awk.\+single.accnos' | sed -r 's/mothur > /mothur: /' | sed -r 's/mothur/\nmothur/' | sed -r 's/\t/ /' | sed -r 's/#/Number/') > countReads.csv
 ```
 Further process them with [this R script](mothur_TrackReads.R).
 
