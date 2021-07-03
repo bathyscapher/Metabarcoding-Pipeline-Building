@@ -11,10 +11,10 @@
 
 rm(list = ls())
 setwd("/home/rstudio/silva/")
-setwd("~/docker/silva/euk/")
+setwd("~/docker/silva/")
 
 
-map.in <- read.table("tax_slv_ssu_138.1.txt", header = FALSE, sep = "\t",
+map.in <- read.table("prok/tax_slv_ssu_138.1.txt", header = FALSE, sep = "\t",
            stringsAsFactors = FALSE)
 map.in <- map.in[, c(1, 3)]
 colnames(map.in) <- c("Taxa", "Rank")
