@@ -49,6 +49,30 @@ which R
 git clone https://github.com/bathyscapher/Metabarcoding-Pipeline-Building
 ```
 
-## 
+
+## Downloads
+### Reference database
+Download the DADA2 reference database data directly from the shell into a target directory (`mothur/refs`). Then, check out this directory.
 ```
+wget -P /mothur/refs https://zenodo.org/record/1172783/files/silva_nr_v132_train_set.fa.gz
+cd /mothur/refs
+wget https://zenodo.org/record/4587955/files/silva_species_assignment_v138.1.fa.gz
 ```
+
+### FASTQ files
+The data are hosted on a private NextCloud server (access will be provided only during the workshop). `<share id>` is the string after the s/ and before the /download in the link.
+```
+curl -u "shareid:password" -H 'X-Requested-With: XMLHttpRequest' 'https://nextcloud.somedomain.com/public.php/webdav/'
+```
+
+## Help
+Each bash command has a help page:
+```
+man R
+```
+
+
+
+
+
+
