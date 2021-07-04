@@ -98,6 +98,8 @@ Now, let's have a look at a bit more complex files.
 1. ... look into it
 1. Extract and ...
 1. list files
+1. `touch` one of the files and
+1. listing the files shows that the time stamp has updated
 1. Look into the extracted files
 1. Delete these files again
 
@@ -106,6 +108,8 @@ cd
 cp ...tar.gz ~
 more ...tar.gz
 tar xzvf ...targ.z
+ll
+touch *.file
 ll
 more ...*
 rm ...
