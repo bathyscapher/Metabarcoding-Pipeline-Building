@@ -7,15 +7,15 @@ docker exec -ti <container ID> bash
 ```
 
 ## Explore the directories
-1. Show the present working directory (it is the "root" directory, symbolized by `/`):
-1. List content in the current directory (works also with `ls`)
-1. Change to the `home` directory (usually the space for the user in Linux)
+1. Show the present working directory (it is the "root" directory, symbolized by `/`) and ...
+1. ... list content in the current directory (works also with `ls`).
+1. Change to the `home` directory (usually the space for the user in Linux).
 1. List content once more: there are three directories:
-    * `.` means the current directory
-    * `..` means the parent directory
+    * `.` stands for the current directory
+    * `..` stands for the parent directory
     * `rstudio` is the name of a directory
 1. Change to `rstudio` ...
-1. ... and list content again
+1. ... and list content again.
 
 ```
 pwd
@@ -28,7 +28,7 @@ ll
 
 ## Run a program in the shell 
 ### Open R
-R runs directly in the shell:
+R runs directly in the shell (and quit with `q()`):
 ```
 R
 ```
@@ -65,18 +65,18 @@ wget https://zenodo.org/record/4587955/files/silva_species_assignment_v138.1.fa.
 ## Handle files
 Now, let's handle some file in Bash.
 
-1. First, navigate to the home directory
-1. Create a directory
-1. Enter this directory
-1. Echo some text into a not-yet-existing file.
+1. First, navigate to the home directory.
+1. Create a directory.
+1. Enter this directory.
+1. `echo` some text into a not-yet-existing file.
 1. Use `more` or...
-1. ... `head` to show the content of a file
+1. ... `head` to show the content of a file.
 1. Copy the file
-1. To append text to a file use `echo` and `>>`
-1. Show content of both files
-1. Delete the first file
+1. To append text to a file use `echo` and `>>`.
+1. Show content of both files.
+1. Delete the first file.
 1. Navigate back to `home` ...
-1. ... and delete the directory `test`
+1. ... and delete the directory `test`.
 
 ```
 cd /home/
@@ -130,7 +130,4 @@ Each bash command has a help page:
 ```
 man R
 ```
-
-
-
 
