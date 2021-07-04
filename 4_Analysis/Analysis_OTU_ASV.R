@@ -21,6 +21,10 @@ setwd("/home/rstudio/")
 
 
 ################################################################################
+set.seed(11948)
+
+
+################################################################################
 ### The readTaxa function expects the data to be arranged in the directory as:
 ### wd: the given working directory
 ### |-- OTU
@@ -37,8 +41,8 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
   ifelse(primer == "16S",
          goto <- "prok/filtered",
          goto <- "euk/filtered")
-  
-  
+
+
   ### Read OTU
   if(method == "OTU" && classifier == "RDP")
   {
@@ -53,31 +57,31 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
                                 "wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.0.03.cons.taxonomy",
                                 sep = "/"),
                           parseFunction = parse_taxonomy_default)
-    
+
     ## Rename taxonomic ranks
     colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
                                    "Family", "Genus")
   }
-  
-  
+
+
   ### Read ASV
   if (method == "ASV")
   {
     seqtab.nochim <- readRDS(paste(goto, "asv.tab.nochim.rds",
                                    sep = "/"))
-    
+
     ifelse(classifier == "RDP",
            taxa <- readRDS(paste(goto, "taxa.rds", sep = "/")),
            taxa <- readRDS(paste(goto, "taxa.id.rds", sep = "/")))
-    
+
     wine <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows = FALSE),
                      tax_table(taxa))
-    
+
     dna <- Biostrings::DNAStringSet(taxa_names(wine))
     names(dna) <- taxa_names(wine)
     wine <- merge_phyloseq(wine, dna)
     taxa_names(wine) <- paste0("ASV", seq(ntaxa(wine)))
-    
+
     ### Rename taxonomic ranks
     ifelse(classifier == "RDP",
            colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
@@ -85,19 +89,19 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
            colnames(tax_table(wine)) <- c("Domain", "Phylum", "Class", "Order",
                                           "Family", "Genus", "Species"))
   }
-  
+
   ### Transpose (sometimes the OTU table is transposed... :-|)
   if (taxa_are_rows(wine))
     {otu_table(wine) <- t(otu_table(wine))}
-  
+
   return(wine)
 }
 
 
 ################################################################################
 ### Read taxa into phyloseq object ####
-method <- "OTU"
-primer <- "16S"
+method <- "ASV"
+primer <- "18S"
 classifier <- "RDP"
 # classifier <- "DECIPHER"
 
@@ -394,7 +398,7 @@ ggplot(reg.df, aes(x = ord.treatment, y = Observed, color = treatment)) +
 ## Set treatment variable as.factor
 reg.df$treatment <- as.factor(reg.df$treatment)
 str(reg.df)
- 
+
 
 ## Relevel default reference for comparison "BareGround"
 reg.df <- within(reg.df, treatment <- relevel(treatment, ref = "BareGround"))
@@ -412,12 +416,12 @@ summary(m1) # t value is higher (+ or -) or equal to 1.96 it is considered signi
 
 m2 <- lmer(Observed ~ treatment + scale(Cu) +
              (1|vineyard) , data = reg.df, REML = FALSE, na.action = "na.fail")
-summary(m2) 
+summary(m2)
 
 
 m3 <- lmer(Observed ~ treatment + scale(som) + scale(Cu) + scale(plant_spec) +
              (1|vineyard) , data = reg.df, REML = FALSE, na.action = "na.fail")
-summary(m3) 
+summary(m3)
 
 
 ## Model comparison
@@ -427,7 +431,7 @@ library("car")
 AIC(m0, m1, m2, m3)
 anova(m0, m1, m2, m3)
 
-# The best model seems to be m2. 
+# The best model seems to be m2.
 # m2 fits best -> treatment does not explain "Observed" OTU richness alone. Copper shows a larger negative effect on "Observed".
 
 
@@ -535,11 +539,11 @@ plot_ordination(wine.a.out, p_nmds, color = "ord.treatment",
 
 ## RDA
 # p_rda <- ordinate(wine.a, "RDA", "bray")
-# 
+#
 # ordcap <- ordinate(wine.a, "CAP", "bray", ~ treatment + Cu + som)
 # summary(ordcap)
-# 
-# 
+#
+#
 # plot_ordination(wine.a, ordcap, "samples", color = "treatment") +
 #   scale_color_manual(values = cols)
 
@@ -572,9 +576,9 @@ cap_plot
 cap_plot = cap_plot + geom_point(size = 4) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = c(18, 16, 17)) +
-  ggtitle("Community composition dbRDA") 
+  ggtitle("Community composition dbRDA")
 #  geom_text(aes(label=sample_data(wine.a)$vineyard), color = "black", size = 2.5) #enable if you wnt your sites to be numbered
-  
+
 cap_plot
 
 ## Now add the environmental variables as arrows
@@ -709,17 +713,17 @@ plt <- venn.diagram(core,
                     category.names = c("Bare ground" , "Alternating cover" ,
                                        "Complete cover"),
                     filename = NULL,
-                    
+
                     # Circles
                     lwd = 2,
                     lty = 'blank',
                     fill = cols,
-                    
+
                     # Numbers
                     cex = .6,
                     fontface = "bold",
                     fontfamily = "sans",
-                    
+
                     # Set names
                     cat.cex = 0.6,
                     cat.fontface = "bold",
