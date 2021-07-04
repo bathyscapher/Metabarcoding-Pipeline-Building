@@ -105,7 +105,12 @@ Now, let's have a look at a bit more complex files.
 1. ... listing the files shows an updated time stamp.
 1. Look into the extracted file ...
 1. ... and quit with `q`.
-1. To only see the headers of the FASTA, use `grep` for extracting all lines with a '>'
+1. To only see the headers of the FASTA, use `grep` for extracting all lines with a '>'.
+1. This also works with any other keyword too.
+1. The lines of interest can be redirected into a file with `>`.
+1. Count the entries (i.e., the lines) in the created file with `wc -l`.
+1. See the first 10 lines with `head` ...
+1. ... and the last 4 lines with `tail`.
 1. Delete the file again.
 
 ```
@@ -115,13 +120,17 @@ more silva_nr_v132_train_set.fa.gz
 q
 gunzip silva_nr_v132_train_set.fa.gz
 ll -h
-touch silva_nr_v132_train_set
+touch silva_nr_v132_train_set.fa
 ll
-more silva_nr_v132_train_set
+more silva_nr_v132_train_set.fa
 q
 grep '>' silva_nr_v132_train_set.fa
 grep Negativicutes silva_nr_v132_train_set.fa
-rm silva_nr_v132_train_set
+grep 'Chlorophyta' silva_nr_v132_train_set.fa > Chlorophyta.txt
+wc -l Chlorophyta.txt
+head -n 10 Chlorophyta.txt
+tail -n 4 Chlorophyta.txt
+rm silva_nr_v132_train_set.fa Chlorophyta.txt
 ```
 
 
