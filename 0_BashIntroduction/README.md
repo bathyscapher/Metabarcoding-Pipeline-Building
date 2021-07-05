@@ -132,6 +132,10 @@ head -n 10 Chlorophyta.txt
 tail -n 4 Chlorophyta.txt
 rm silva_nr_v132_train_set.fa Chlorophyta.txt
 ```
+zcat silva_nr_v132_train_set.fa.gz | more
+grep '>' silva_nr_v132_train_set.fa | wc -l
+grep -c '>' silva_nr_v132_train_set.fa
+
 
 
 ## Help
@@ -143,6 +147,8 @@ man R
 ## Download workshop data and failsafes
 ```
 wget --content-disposition https://cloud.tugraz.at/index.php/s/rKkZNXooqAipPyH/download
+tar xzvf prok_failsafe.tar.gz
+mv prok_failsafe prok
 ```
 
 
