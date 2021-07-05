@@ -140,3 +140,9 @@ Each bash command has a help page:
 man R
 ```
 
+## Download workshop data and failsafes
+```
+wget --content-disposition https://cloud.tugraz.at/index.php/s/rKkZNXooqAipPyH/download
+```
+
+
