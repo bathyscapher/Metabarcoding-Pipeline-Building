@@ -99,6 +99,7 @@ Now, let's have a look at a bit more complex files.
 1. copy a *tar.gz file to home (the `.` stands for the present working directory) and ...
 1. ... look into it ...
 1. ... and exit with `q`.
+1. Extract the file with `zcat`, but piping (| is the pipe character in Bash) the output into `more` allows to read a compressed file.
 1. Extract and ...
 1. ...list files with the `-h` flag (for human readable).
 1. `touch` one of the files and ...
@@ -106,6 +107,8 @@ Now, let's have a look at a bit more complex files.
 1. Look into the extracted file ...
 1. ... and quit with `q`.
 1. To only see the headers of the FASTA, use `grep` for extracting all lines with a '>'.
+1. To count the line in which the keyword appears, either pipe the output into `wc -l` or ...
+1. ... use the flag `-c` in `grep`.
 1. This also works with any other keyword too.
 1. The lines of interest can be redirected into a file with `>`.
 1. Count the entries (i.e., the lines) in the created file with `wc -l`.
@@ -113,11 +116,13 @@ Now, let's have a look at a bit more complex files.
 1. ... and the last 4 lines with `tail`.
 1. Delete the file again.
 
+
 ```
 cd /home/
 cp /mothur/refs/silva_nr_v132_train_set.fa.gz .
 more silva_nr_v132_train_set.fa.gz
 q
+zcat silva_nr_v132_train_set.fa.gz | more
 gunzip silva_nr_v132_train_set.fa.gz
 ll -h
 touch silva_nr_v132_train_set.fa
@@ -125,6 +130,8 @@ ll
 more silva_nr_v132_train_set.fa
 q
 grep '>' silva_nr_v132_train_set.fa
+grep '>' silva_nr_v132_train_set.fa | wc -l
+grep -c '>' silva_nr_v132_train_set.fa
 grep Negativicutes silva_nr_v132_train_set.fa
 grep 'Chlorophyta' silva_nr_v132_train_set.fa > Chlorophyta.txt
 wc -l Chlorophyta.txt
@@ -132,10 +139,6 @@ head -n 10 Chlorophyta.txt
 tail -n 4 Chlorophyta.txt
 rm silva_nr_v132_train_set.fa Chlorophyta.txt
 ```
-zcat silva_nr_v132_train_set.fa.gz | more
-grep '>' silva_nr_v132_train_set.fa | wc -l
-grep -c '>' silva_nr_v132_train_set.fa
-
 
 
 ## Help
