@@ -101,7 +101,8 @@ Now, let's have a look at a bit more complex files.
 1. ... and exit with `q`.
 1. Extract the file with `zcat`, but piping (| is the pipe character in Bash) the output into `more` allows to read a compressed file.
 1. Extract and ...
-1. ...list files with the `-h` flag (for human readable).
+1. ...list files with the `-h` flag (for human readable) ...
+1. ... and with `-S` to sort by size.
 1. `touch` one of the files and ...
 1. ... listing the files shows an updated time stamp.
 1. Look into the extracted file ...
@@ -125,6 +126,7 @@ q
 zcat silva_nr_v132_train_set.fa.gz | more
 gunzip silva_nr_v132_train_set.fa.gz
 ll -h
+ll -S
 touch silva_nr_v132_train_set.fa
 ll
 more silva_nr_v132_train_set.fa
@@ -148,10 +150,11 @@ man R
 ```
 
 ## Download workshop data and failsafes
+1. Download from the server
+
 ```
 wget --content-disposition https://cloud.tugraz.at/index.php/s/rKkZNXooqAipPyH/download
 tar xzvf prok_failsafe.tar.gz
-mv prok_failsafe prok
 ```
 
 
