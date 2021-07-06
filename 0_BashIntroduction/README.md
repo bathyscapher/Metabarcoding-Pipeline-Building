@@ -147,8 +147,7 @@ rm silva_nr_v132_train_set.fa Chlorophyta.txt
 Each bash command has a help page:
 ```
 man R
-```library(devtools)
-devtools::install_github("benjjneb/dada2", ref="v1.6")
+```
 
 ## Download workshop data and failsafes
 1. Download from the server
@@ -160,10 +159,7 @@ tar xzvf prok_failsafe.tar.gz
 
 wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/g7KPHxgmKqxL8RA/download
 tar xzvf prok_DADA2_fs.tar.gz
-```
 
-
-```
 wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/Mb5aJg8eFC2kSzm/download 
 ll
 
