@@ -155,6 +155,9 @@ man R
 ```
 wget --content-disposition https://cloud.tugraz.at/index.php/s/rKkZNXooqAipPyH/download
 tar xzvf prok_failsafe.tar.gz
+
+wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/g7KPHxgmKqxL8RA/download
+tar xzvf prok_DADA2_fs.tar.gz
 ```
 
 
