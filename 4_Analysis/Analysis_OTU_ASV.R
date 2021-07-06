@@ -37,7 +37,7 @@ set.seed(11948)
 
 readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
                      classifier = c("RDP", "DECIPHER")){
-  ### Specifiy path for pro- and eukaryotes
+  ### Specify path for pro- and eukaryotes
   ifelse(primer == "16S",
          goto <- "prok/filtered",
          goto <- "euk/filtered")
@@ -100,8 +100,8 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
 
 ################################################################################
 ### Read taxa into phyloseq object ####
-method <- "ASV"
-primer <- "18S"
+method <- "OTU"
+primer <- "16S"
 classifier <- "RDP"
 # classifier <- "DECIPHER"
 
