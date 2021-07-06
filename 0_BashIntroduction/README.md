@@ -45,9 +45,14 @@ which R
 
 
 ## Git
-[Git](https://git-scm.com/) is a version control system that is employed by [GitHub](https://github.com/). The course material is all hosted on in a [GitHub repo(sitory)](https://github.com/bathyscapher/). Let's fetch this repo.
+[Git](https://git-scm.com/) is a version control system that is employed by [GitHub](https://github.com/). The course material is all hosted on in a [GitHub repo(sitory)](https://github.com/bathyscapher/Metabarcoding-Pipeline-Building). Let's fetch this repo.
 ```
 git clone https://github.com/bathyscapher/Metabarcoding-Pipeline-Building
+```
+
+To update a git repository:
+```
+git pull
 ```
 
 
@@ -161,8 +166,6 @@ wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/
 tar xzvf prok_DADA2_fs.tar.gz
 
 wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/Mb5aJg8eFC2kSzm/download 
-ll
-
 wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/HtyZt8cpdDjeEBd/download 
 ```
 
