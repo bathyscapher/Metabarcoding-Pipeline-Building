@@ -64,6 +64,9 @@ wget -P /mothur/refs https://zenodo.org/record/1172783/files/silva_nr_v132_train
 cd /mothur/refs
 ll -rt
 wget https://zenodo.org/record/4587955/files/silva_species_assignment_v138.1.fa.gz
+
+
+wget -P /mothur/refs http://www2.decipher.codes/Classification/TrainingSets/SILVA_SSU_r138_2019.RData
 ```
 
 
