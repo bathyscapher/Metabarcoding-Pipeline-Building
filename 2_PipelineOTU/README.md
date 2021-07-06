@@ -41,7 +41,7 @@ Remove all contigs that are either too long or too short and exceed a certain am
 The expected amplicon length of the [EMP 16S primers](http://www.earthmicrobiome.org/protocols-and-standards/16s/) is about 300 to 350 bp, the [EMP 18S primers](http://www.earthmicrobiome.org/protocols-and-standards/18s/) about 260 +/- 50 bp.
 ```bash
 ### 16S
-screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=290, maxlength=295, maxhomop=8)
+screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=253, maxlength=254, maxhomop=8)
 
 ### 18S
 screen.seqs(fasta=wine.trim.contigs.fasta, group=wine.contigs.groups, summary=wine.trim.contigs.summary, maxambig=0, minlength=300, maxlength=340, maxhomop=15)
@@ -146,18 +146,6 @@ classify.seqs(fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.
 get.current()
 ```
 
-### Classify OTUs
-Find consensus taxonomy for an OTU. **SKIPPED THIS PART AS THE LIST FILE IS MISSING**
-```bash
-### 16S
-#classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_16S-V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
-
-### 18S
-#classify.otu(list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1_18S-V4.wang.tx.list, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, taxonomy=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.v138.1.wang.taxonomy)
-
-#get.current()
-```
-
 
 ### Compute distance matrix and cluster OTUs
 Calculate uncorrected pairwise distances between the aligned DNA sequences; distances > 0.1 are ignored to safe resources (note: avoid `cluster.split`, results are inaccurate). Then, cluster this sequences into OTUs with the [OptiClust](https://msphere.asm.org/content/2/2/e00073-17) method.
@@ -190,8 +178,6 @@ get.current()
 
 
 ### Get representative sequences for OTUs
-* = cluster centroids?
-
 Returns a FASTA file where the headers additionally carry the OTU number and the total abundance.
 ```bash
 get.oturep(column=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.dist, list=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.list, fasta=wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=wine.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.count_table, cutoff=0.03)
