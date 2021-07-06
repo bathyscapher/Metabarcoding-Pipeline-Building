@@ -17,8 +17,8 @@ rm(list = ls())
 
 
 ## Choose pro- or eukaryotes
-# primer <- "16S"
-primer <- "18S"
+primer <- "16S"
+# primer <- "18S"
 
 
 if (primer == "16S") {
@@ -26,6 +26,8 @@ if (primer == "16S") {
   } else {
     setwd("/home/rstudio/euk/filtered")
   }
+
+
 getwd()
 
 
@@ -48,8 +50,16 @@ names(rR) <- sample.names
 
 
 ### Estimate and plot the error rates
-errF <- learnErrors(rF, multithread = ncore, verbose = TRUE)
-errR <- learnErrors(rR, multithread = ncore, verbose = TRUE)
+## Increase number of bases used to learn the errors increases model accuracy
+errF <- learnErrors(rF, multithread = ncore, verbose = TRUE, nbases = 1e10)
+errR <- learnErrors(rR, multithread = ncore, verbose = TRUE, nbases = 1e10)
+
+
+saveRDS(errF, "errF.rds")
+saveRDS(errR, "errR.rds")
+# errF <- readRDS("errF.rds")
+# errR <- readRDS("errR.rds")
+
 
 plotErrors(errF, nominalQ = TRUE)
 plotErrors(errR, nominalQ = TRUE)
@@ -92,12 +102,12 @@ saveRDS(asv.tab.nochim, "asv.tab.nochim.rds")
 
 
 ### Assign taxonomy with RDP classifier
-asv.tab.nochim <- readRDS(file = "asv.tab.nochim.rds")
+asv.tab.nochim <- readRDS("asv.tab.nochim.rds")
 
-taxa <- assignTaxonomy(asv.tab.nochim,
-                       "/mothur/refs/silva_nr_v132_train_set.fa.gz", # 18S 
-                       # "/mothur/refs/silva_nr99_v138.1_train_set.fa.gz", # 16S
-                       # tryRC = TRUE,
+
+taxa <- assignTaxonomy(asv.tab.nochim, 
+                       # "/mothur/refs/silva_nr_v132_train_set.fa.gz", # 18S
+                       "/mothur/refs/silva_nr99_v138.1_train_set.fa.gz", # 16S
                        multithread = TRUE, verbose = TRUE)
 
 
@@ -112,10 +122,15 @@ taxa.species <- assignSpecies(taxa,
 saveRDS(taxa.species, "taxa.species.rds")
 
 
+taxa.species <- readRDS("taxa.species.rds")
+dim(taxa.species)
+
+
 ### Assign taxonomy with IdTaxa
 dna <- DNAStringSet(getSequences(asv.tab.nochim))
 
-load("/home/rstudio/silva/old_SILVA_SSU_r138_2019.RData")
+
+load("/mothur/refs/SILVA_SSU_r138_2019.RData")
 
 
 ids <- IdTaxa(dna, trainingSet, strand = "top", processors = ncore,
@@ -137,6 +152,13 @@ rownames(taxa.id) <- getSequences(asv.tab.nochim)
 
 
 saveRDS(taxa.id, "taxa.id.rds")
+
+
+################################################################################
+## Exercise: export the first 10 sequences and identify them with BLAST
+## https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome
+names(dna) <- sprintf("ASV%04d", 1:length(dna))
+writeXStringSet(dna[1:10], "asv.tab.nochim.10.FASTA")
 
 
 ################################################################################
