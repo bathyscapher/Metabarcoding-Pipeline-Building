@@ -112,6 +112,9 @@ taxa <- assignTaxonomy(asv.tab.nochim,
 
 
 saveRDS(taxa, "taxa.rds")
+taxa <- readRDS("taxa.rds")
+rownames(taxa)  <- NULL
+head(taxa[, -(1:2)])
 
 
 ### Add species
@@ -152,6 +155,11 @@ rownames(taxa.id) <- getSequences(asv.tab.nochim)
 
 
 saveRDS(taxa.id, "taxa.id.rds")
+
+
+## Compare the classification approaches
+head(taxa[, -(1:2)])
+head(taxa.id[, -(1:2)])
 
 
 ################################################################################
