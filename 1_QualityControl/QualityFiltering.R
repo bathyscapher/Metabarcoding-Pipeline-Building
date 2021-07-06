@@ -37,6 +37,8 @@ list.files(pattern = "fastq.gz")
 
 rF <- sort(list.files(pattern = "_R1_sub.fastq.gz", full.names = TRUE))
 rR <- sort(list.files(pattern = "_R2_sub.fastq.gz", full.names = TRUE))
+rF
+rR
 
 
 ## Extract sample names
@@ -84,7 +86,7 @@ primerHits <- function(primer, fn) {
 
 ## Cut the primers (find path to cutadapt with "which cutadapt" in bash)
 cutadapt <- "/usr/local/bin/cutadapt"
-# system2(cutadapt, args = "--version")
+system2(cutadapt, args = "--version")
 
 
 path.cut <- file.path(".", "cutPrimers")
@@ -142,7 +144,7 @@ names(rR.cut.f) <- sample.names
 
 
 ### Quality filtering
-FASTQ.f <- filterAndTrim(rF.fN, rF.cut.f, rR.fN, rR.cut.f,
+FASTQ.f <- filterAndTrim(rF.cut, rF.cut.f, rR.cut, rR.cut.f,
                          maxN = 0, maxEE = c(2, 2), minLen = 100,
                          truncQ = 2, rm.phix = TRUE,
                          compress = TRUE, multithread = ncore, verbose = TRUE)
