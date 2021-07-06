@@ -153,15 +153,21 @@ devtools::install_github("benjjneb/dada2", ref="v1.6")
 ## Download workshop data and failsafes
 1. Download from the server
 
+
 ```
 wget --content-disposition https://cloud.tugraz.at/index.php/s/rKkZNXooqAipPyH/download
 tar xzvf prok_failsafe.tar.gz
 
 wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/g7KPHxgmKqxL8RA/download
 tar xzvf prok_DADA2_fs.tar.gz
+```
 
-wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/Mb5aJg8eFC2kSzm/download
-wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/HtyZt8cpdDjeEBd/download
+
+```
+wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/Mb5aJg8eFC2kSzm/download 
+ll
+
+wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/HtyZt8cpdDjeEBd/download 
 ```
 
 
