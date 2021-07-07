@@ -158,16 +158,7 @@ man R
 ```
 
 ## Download workshop data and failsafes
-1. Download from the server
-
-
 ```
-wget --content-disposition https://cloud.tugraz.at/index.php/s/rKkZNXooqAipPyH/download
-tar xzvf prok_failsafe.tar.gz
-
-wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/g7KPHxgmKqxL8RA/download
-tar xzvf prok_DADA2_fs.tar.gz
-
 # mothur failsafe
 mkdir /home/rstudio/prok/OTU/fs
 wget -P /home/rstudio/prok/OTU/fs --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/5HZNPr8Fb4MSCBG/download
