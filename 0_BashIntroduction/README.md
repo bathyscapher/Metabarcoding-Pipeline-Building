@@ -168,8 +168,13 @@ tar xzvf prok_failsafe.tar.gz
 wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/g7KPHxgmKqxL8RA/download
 tar xzvf prok_DADA2_fs.tar.gz
 
-wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/Mb5aJg8eFC2kSzm/download 
-wget --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/HtyZt8cpdDjeEBd/download 
+# mothur failsafe
+mkdir /home/rstudio/prok/OTU/fs
+wget -P /home/rstudio/prok/OTU/fs --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/5HZNPr8Fb4MSCBG/download
+
+# SILVA db for mothur
+mkdir /home/rstudio/silva/prok
+wget -P /home/rstudio/silva/prok --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/QfpqcdMRb46AmAq/download
 ```
 
 
