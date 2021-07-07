@@ -24,6 +24,3 @@ In this workshop, the participants will be introduced to the workflow of microbi
   * microbiome
   * VennDiagram
 
-
-## To do
-* track total reads in dada2
