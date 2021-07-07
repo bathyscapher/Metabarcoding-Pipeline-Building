@@ -1,4 +1,4 @@
-set.dir(tempdefault=/home/rstudio/prok/filtered)
+set.dir(tempdefault=.)
 set.current(processors=4)
 
 make.file(inputdir=., type=gz, prefix=wine)

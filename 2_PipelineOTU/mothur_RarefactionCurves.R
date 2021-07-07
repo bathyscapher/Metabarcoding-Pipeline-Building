@@ -2,7 +2,7 @@
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
 ### mothur pipeline OTU: rarefaction curves
-### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2020
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
 ################################################################################
@@ -13,15 +13,15 @@ library("ggplot2")
   theme_set(theme_bw(base_size = 20))
 library("reshape2")
 
-setwd("/scratch/PromESSinG/")
+setwd("/home/rstudio/prok/OTU/")
+
 
 ################################################################################
-list.files(path = ".", pattern = "rare", recursive = TRUE)
+rare.file <- list.files(path = ".", pattern = "rare", recursive = TRUE)
 
 ### 16S
-rarefied16S <- read.table("prok/filtered/wine.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.opti_mcc.groups.rarefaction"
-                          ,
-                          sep = "\t", header = TRUE, check.names = FALSE)
+rarefied16S <- read.table(rare.file, sep = "\t", header = TRUE, 
+                          check.names = FALSE)
 
 numsampled <- rarefied16S$numsampled
 
@@ -117,9 +117,12 @@ rm(rarefied16S.merged, rarefied18S.merged)
 head(rarefied)
 
 
+rarefied <- rarefied16S.merged
+
+
 rarefied$Vineyard <- gsub("^[[:digit:]]", "", rarefied$Sample)
 
-metaData <- read.table("~/Documents/Seafile/PromESSinG_Bioinformatics/MicrobiomeWorkshop/DNA_sampleID.csv",
+metaData <- read.table("/home/rstudio/Metabarcoding-Pipeline-Building/DNA_sampleID.csv",
                        sep = "\t", header = TRUE)
 
 rarefied <- merge(rarefied, metaData[, c(5, 9)],
