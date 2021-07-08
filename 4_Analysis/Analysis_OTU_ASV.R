@@ -158,11 +158,11 @@ summarize_phyloseq(wine)
 
 
 ## Which taxa do we have in our data? Here on the phyla level:
-get_taxa_unique(wine, taxonomic.rank = rank_names(wine)[2], errorIfNULL = TRUE)
+get_taxa_unique(wine, taxonomic.rank = rank_names(wine)[1], errorIfNULL = TRUE)
 
 
 ## Look at our data
-readsumsdf <- data.frame(nreads = sort(taxa_sums(wine), TRUE),
+readsumsdf <- data.frame(nreads = taxa_sums(wine),
                          sorted = 1:ntaxa(wine), type = "OTUs")
 
 
@@ -171,12 +171,22 @@ ggplot(readsumsdf, aes(x = sorted, y = nreads)) +
   geom_bar(stat = "identity") +
   ggtitle("Total number of reads") +
   scale_y_log10() +
+  # coord_cartesian(ylim = c(0, 100)) +
   xlab("") +
   ylab(expression(paste(log[10], "(Number of reads)")))
 
 
 wine
 colSums(readsumsdf[, 1, drop = FALSE])
+
+################################################################################
+### Remove singletons ###
+sum(taxa_sums(wine) == 1)
+
+
+if(any(taxa_sums(wine) == 1))
+  {wine <- prune_taxa(taxa_sums(wine) > 1, wine)}
+wine
 
 
 ################################################################################
@@ -215,7 +225,7 @@ wine.s
 sum(taxa_sums(wine.s) == 0)
 
 if(any(taxa_sums(wine.s) == 0))
-  {wine <- prune_taxa(taxa_sums(wine.s) > 0, wine.s)}
+  {wine.s <- prune_taxa(taxa_sums(wine.s) > 0, wine.s)}
 
 
 ## Check sample_sums (to check if we should remove a sample with a very low
@@ -229,7 +239,7 @@ summary(sums) # looks good no sample should be removed
 
 
 ## Rarefy
-set.seed(100)
+# set.seed(100)
 wine.r <- rarefy_even_depth(wine)
 wine.r
 wine.s
@@ -304,6 +314,7 @@ plot_bar(wine.a, x = "Phylum", fill = "ord.treatment") +
 ### Plot rank abundance of Orders ####
 colnames(tax_table(wine.a)) # print the available taxonomic ranks
 wine.ord <- aggregate_taxa(wine.a, "Order")
+wine.ord
 
 
 par(mar = c(10, 4, 4, 2) + 0.1)  # make more room on bottom margin
@@ -402,6 +413,7 @@ str(reg.df)
 
 ## Relevel default reference for comparison "BareGround"
 reg.df <- within(reg.df, treatment <- relevel(treatment, ref = "BareGround"))
+str(reg.df)
 
 
 ### General linear models
@@ -439,6 +451,7 @@ anova(m0, m1, m2, m3)
 res1 <- resid(m2)
 qqnorm(res1)
 qqline(res1)
+plot(res1)
 
 
 ## Plot model predictions from m2 Observed ~ Cu
@@ -629,6 +642,8 @@ p
 wine.core <- core(wine.a, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 90 % of the samples
 summarize_phyloseq(wine.core)
 summarize_phyloseq(wine.a)
+wine.core
+wine.a
 
 
 ## Percentage of core n_taxa compared to full dataset
@@ -659,6 +674,7 @@ all.CC <- subset_samples(wine.a, treatment == "CompleteCover") # select bare gro
 any(taxa_sums(all.CC) == 0) # OTUs with abundance 0
 all.CC <- prune_taxa(taxa_sums(all.CC) > 0, all.CC) # only keep OTUs >0
 wine.CC <- row.names(tax_table(all.CC))
+
 
 all <- list(wine.BG, wine.AC, wine.CC)
 
@@ -737,3 +753,6 @@ grid::grid.draw(plt)
 
 ################################################################################
 ################################################################################
+
+
+
