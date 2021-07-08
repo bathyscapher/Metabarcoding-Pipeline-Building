@@ -160,12 +160,7 @@ man R
 ## Download workshop data and failsafes
 ```
 # mothur failsafe
-mkdir /home/rstudio/prok/OTU/fs
-wget -P /home/rstudio/prok/OTU/fs --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/5HZNPr8Fb4MSCBG/download
-
-# SILVA db for mothur
-mkdir /home/rstudio/silva/prok
-wget -P /home/rstudio/silva/prok --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/QfpqcdMRb46AmAq/download
+wget -P /home/rstudio/prok/filtered --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/48NBTycizzCLTkd/download
 ```
 
 
