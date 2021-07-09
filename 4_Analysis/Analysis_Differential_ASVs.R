@@ -26,6 +26,10 @@ if (!deseq2_installed) {
 library(DESeq2)
 packageVersion("DESeq2")
 
+rm(list = ls())
+setwd("/home/rstudio/")
+
+
 ################################################################################
 ### The readTaxa function expects the data to be arranged in the directory as:
 ### wd: the given working directory
@@ -108,7 +112,6 @@ metadata$treatment[metadata$treatment == 'AC'] <- 'AlternatingCover'
 metadata$treatment[metadata$treatment == 'BG'] <- 'BareGround'
 metadata$treatment[metadata$treatment == 'CC'] <- 'CompleteCover'
 
-
 ## Code vineyard names as factors
 metadata$treatment <- as.factor(metadata$treatment)
 
@@ -147,6 +150,7 @@ tax.asv.deseq.de <- DESeq(tax.asv.deseq.sf, fitType="local")
 res = results(tax.asv.deseq.de)
 res = res[order(res$padj, na.last=NA), ]
 dim(res)
+head(res)
 
 # Extract all taxa differentially abundant at a significance level 0.05
 alpha = 0.05
@@ -171,9 +175,10 @@ x = sort(x, TRUE)
 sigtabgen$Genus = factor(as.character(sigtabgen$Genus), levels=names(x))
 ggplot(sigtabgen, aes(y=Genus, x=log2FoldChange, color=Phylum)) + 
   geom_vline(xintercept = 0.0, color = "gray", size = 0.5) +
-  geom_point(size=6) + 
+  geom_point(size=6) + labs(title="CompleteCover vs AlternatingCover") +
   theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust=0.5))
 
+#========================================================================
 # Exercise: DA between 2 groups only
 table(sample_data(tax.asv)$treatment)
 subset_samples(tax.asv, sample_data(tax.asv)$treatment != "CompleteCover")
