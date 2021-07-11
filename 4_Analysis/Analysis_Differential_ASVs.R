@@ -1,7 +1,7 @@
 ###############################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
-### Analysis of microbiome data
+### Differentially abundant OTUs/ASVs
 ### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
