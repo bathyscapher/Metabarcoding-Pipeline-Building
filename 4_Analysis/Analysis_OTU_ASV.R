@@ -1,7 +1,7 @@
 ###############################################################################
 ################################################################################
 ### Metabarcoding Pipeline Building: CUSO Workshop
-### Analysis of microbiome data
+### Statistical analysis of microbiome data
 ### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
 ### korn@cumulonimbus.at
 ################################################################################
@@ -10,8 +10,7 @@
 
 library("phyloseq")
 library("ggplot2")
-theme_set(theme_bw(base_size = 20) +
-            theme(rect = element_rect(fill = "transparent")))
+theme_set(theme_bw(base_size = 20))
 library("vegan")
 library("microbiome")
 
@@ -179,18 +178,16 @@ ggplot(readsumsdf, aes(x = sorted, y = nreads)) +
 wine
 colSums(readsumsdf[, 1, drop = FALSE])
 
+
 ################################################################################
 ### Remove singletons ###
 sum(taxa_sums(wine) == 1)
-
-
-if(any(taxa_sums(wine) == 1))
-  {wine <- prune_taxa(taxa_sums(wine) > 1, wine)}
+wine <- prune_taxa(taxa_sums(wine) > 1, wine)
 wine
 
 
 ################################################################################
-### Remove spurious taxa ####
+### Remove noise taxa ####
 if(primer == "16S")
   {
   wine.s <- subset_taxa(wine, !(Domain %in% c("unknown", "Eukaryota") |
@@ -320,8 +317,7 @@ wine.ord
 par(mar = c(10, 4, 4, 2) + 0.1)  # make more room on bottom margin
 N <- 20 # show the top20 abundant Orders
 barplot(sort(taxa_sums(wine.ord), TRUE)[1:N] / nsamples(wine.ord),
-        main = "Relative abundance of top 20 most abundant Orders",
-        las = 2)
+        main = "Relative abundance of top 20 most abundant Orders", las = 2)
 
 
 ## If you want to save data tables separately, write raw data tables
@@ -339,12 +335,14 @@ write.table((sample_data(wine.a)), "wine.a_meta.csv", col.names = NA,
 tax <- as.data.frame(wine.a@tax_table@.Data)
 otu <- as.data.frame(t(otu_table(wine.a)))
 
+
 tax.otu <- merge(tax, otu, by = 0, all = TRUE) # by = 0 = by rownames
 rownames(tax.otu) <- tax.otu$Row.names
 tax.otu$Row.names <- NULL
 tax.otu[1:5, 1:10]
 
-rm(tax, otu)
+
+rm(tax, otu) # delete helper files
 
 
 ### Alpha diversity with untransformed data
@@ -423,7 +421,7 @@ m0 <- lmer(Observed ~ 1 + (1|vineyard), data = reg.df, REML = FALSE,
 
 m1 <- lmer(Observed ~ treatment + (1|vineyard) , data = reg.df, REML = FALSE,
            na.action = "na.fail")
-summary(m1) # t value is higher (+ or -) or equal to 1.96 it is considered significant (rule-of-thumb)
+summary(m1) # t-value >= (+ or -) 1.96 is considered significant (rule-of-thumb)
 
 
 m2 <- lmer(Observed ~ treatment + scale(Cu) +
@@ -443,8 +441,8 @@ library("car")
 AIC(m0, m1, m2, m3)
 anova(m0, m1, m2, m3)
 
-# The best model seems to be m2.
-# m2 fits best -> treatment does not explain "Observed" OTU richness alone. Copper shows a larger negative effect on "Observed".
+## The best model seems to be m2 -> treatment does not explain "Observed" OTU 
+## richness alone. Copper shows a larger negative effect on "Observed".
 
 
 ## Check model fit
@@ -474,13 +472,6 @@ ggplot(reg.df, aes(x = scale(Cu), y = Observed, color = ord.treatment)) +
 
 ################################################################################
 ### Community composition ####
-wine.a
-
-
-## With relative abundance data
-otu_table(wine.a)[1:5, 1:5]
-
-
 ## Testing for homogeneous variation of groups in order to exclude significant
 ## effects due to inhomogeneous distributions
 ## Convert into distance matrix
@@ -494,23 +485,20 @@ beta <- betadisper(d, sampledf$treatment)
 permutest(beta) # not significant: variations are sufficiently homogeneous
 
 
-## Perform test
-anova(beta)
-
-
 ## Visualize variances
 beta <- with(sampledf, betadisper(d, treatment))
 plot(beta)
 boxplot(beta, xlab = "Treatment", col = cols)
 
 
-### NMDS (unconstrained Ordination) ####
+### Unconstrained ordination ####
 ## NMDS of Bray-Curtis distance
 p_nmds <- ordinate(wine.a, "NMDS", "bray", autotransform = FALSE,
-                   trymax = 50)
+                   trymax = 50, k = 2)
 p_nmds
 
-stressplot(p_nmds) # GOF
+
+stressplot(p_nmds) # goodness-of-fit
 
 
 plot_ordination(wine.a, p_nmds, color = "ord.treatment", shape = "ord.treatment") +
@@ -528,8 +516,8 @@ plot_ordination(wine.a, p_nmds, color = "ord.treatment", shape = "ord.treatment"
 wine.a.out <- subset_samples(wine.a, vineyard != "31")
 
 
-## NMDS of Bray-Curtis distance outliers removed
-p_nmds <- ordinate(wine.a.out, "NMDS", "bray")
+## nMDS of Bray-Curtis distance without outliers
+p_nmds <- ordinate(wine.a.out, "NMDS", "bray", autotransform = FALSE)
 p_nmds
 
 stressplot(p_nmds)
@@ -548,98 +536,62 @@ plot_ordination(wine.a.out, p_nmds, color = "ord.treatment",
 
 
 ### Constrained ordination ####
-## RDA
-
-## RDA
-# p_rda <- ordinate(wine.a, "RDA", "bray")
-#
-# ordcap <- ordinate(wine.a, "CAP", "bray", ~ treatment + Cu + som)
-# summary(ordcap)
-#
-#
-# plot_ordination(wine.a, ordcap, "samples", color = "treatment") +
-#   scale_color_manual(values = cols)
-
-## CAP (dbRDA) ordinate ####
-cap_ord <- ordinate(
-  physeq = wine.a,
-  method = "CAP",
-  distance = "bray",
-  formula = ~ treatment + Cu + som + plant_spec)
+### CAP/dbRDA ####
+cap_ord <- ordinate(physeq = wine.a, method = "CAP", distance = "bray",
+                    formula = ~ treatment + Cu + som + plant_spec)
 summary(cap_ord)
 cap_ord
 anova(cap_ord)
-screeplot(cap_ord) # visualisation of explained variation by axes
-
 RsquareAdj(cap_ord)
 
 
-## CAP plot ####
-cap_plot <- plot_ordination(
-  physeq = wine.a,
-  ordination = cap_ord,
-  color = "treatment",
-  shape = "treatment",
-  axes = c(1,2))
-
-cap_plot
+screeplot(cap_ord) # visualisation of explained variation by axes
 
 
-## Customize your plot
-cap_plot = cap_plot + geom_point(size = 4) +
+## CAP plot
+cap_plot <- plot_ordination(physeq = wine.a, ordination = cap_ord,
+                            color = "treatment", shape = "treatment",
+                            axes = c(1, 2)) +
+  geom_point(size = 4) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = c(18, 16, 17)) +
   ggtitle("Community composition dbRDA")
-#  geom_text(aes(label=sample_data(wine.a)$vineyard), color = "black", size = 2.5) #enable if you wnt your sites to be numbered
-
 cap_plot
 
-## Now add the environmental variables as arrows
+
+## Add the environmental variables as arrows
 arrowmat <- vegan::scores(cap_ord, display = "bp")
 
-## Add labels, make a data.frame
+## Add labels and convert into a data.frame
 arrowdf <- data.frame(labels = rownames(arrowmat), arrowmat)
 
+
 ## Define the arrow aesthetic mapping
-arrow_map <- aes(xend = CAP1,
-                 yend = CAP2,
-                 x = 0,
-                 y = 0,
-                 shape = NULL,
-                 color = NULL,
-                 label = labels)
-
-label_map <- aes(x = 1.3 * CAP1,
-                 y = 1.3 * CAP2,
-                 shape = NULL,
-                 color = NULL,
-                 label = labels)
-
-arrowhead = arrow(length = unit(0.02, "npc"))
+arrow_map <- aes(xend = CAP1, yend = CAP2,
+                 x = 0, y = 0,
+                 shape = NULL, color = NULL, label = labels)
 
 
-# Make a new graphic
-p <- cap_plot +
-  geom_segment(
-    mapping = arrow_map,
-    size = .8,
-    data = arrowdf,
-    color = "grey28",
-    arrow = arrowhead
-  ) +
-  geom_text(
-    mapping = label_map,
-    size = 4,
-    data = arrowdf,
-    show.legend = FALSE
-  ) +
+label_map <- aes(x = 1.3 * CAP1, y = 1.3 * CAP2,
+                 shape = NULL, color = NULL, label = labels)
+
+
+arrowhead <- arrow(length = unit(0.02, "npc")) # arrow head
+
+
+## Add to previous plot
+cap_plot +
+  geom_segment(data = arrowdf, mapping = arrow_map, size = .8,
+               color = "grey28", arrow = arrowhead) +
+  geom_text(data = arrowdf, mapping = label_map, size = 4,
+            show.legend = FALSE) +
   geom_hline(yintercept = 0, linetype = "dotted") +
   geom_vline(xintercept = 0, linetype = "dotted")
-p
 
 
 ### The core microbiome - common core across all treatments ####
-wine.core <- core(wine.a, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 90 % of the samples
+## Chose minimum abundance of 0.05 % and prevalence in 90 % of all samples
+wine.core <- core(wine.a, detection = .0005, prevalence = .90)
 summarize_phyloseq(wine.core)
 summarize_phyloseq(wine.a)
 wine.core
@@ -655,104 +607,84 @@ library("VennDiagram")
 
 
 ## Prepare datasets for VennDiagramm
-## Bare ground
-all.BG <- subset_samples(wine.a, treatment == "BareGround") # select bare ground samples
+## Select "Bare ground" samples
+all.BG <- subset_samples(wine.a, treatment == "BareGround")
 any(taxa_sums(all.BG) == 0) # OTUs with abundance 0
 all.BG <- prune_taxa(taxa_sums(all.BG) > 0, all.BG) # only keep OTUs >0
 wine.BG <- row.names(tax_table(all.BG))
 
 
-## Alternating cover
-all.AC <- subset_samples(wine.a, treatment == "AlternatingCover") # select bare ground samples
+## Select "Alternating cover" samples
+all.AC <- subset_samples(wine.a, treatment == "AlternatingCover")
 any(taxa_sums(all.AC) == 0) # OTUs with abundance 0
 all.AC <- prune_taxa(taxa_sums(all.AC) > 0, all.AC) # only keep OTUs >0
 wine.AC <- row.names(tax_table(all.AC))
 
 
-## Complete cover
-all.CC <- subset_samples(wine.a, treatment == "CompleteCover") # select bare ground samples
+## Select "Complete cover" samples
+all.CC <- subset_samples(wine.a, treatment == "CompleteCover")
 any(taxa_sums(all.CC) == 0) # OTUs with abundance 0
 all.CC <- prune_taxa(taxa_sums(all.CC) > 0, all.CC) # only keep OTUs >0
 wine.CC <- row.names(tax_table(all.CC))
 
 
+## Add them to a list
 all <- list(wine.BG, wine.AC, wine.CC)
 
 
 ## VennDiagram for all OTUs
 dev.off()
-plt <- venn.diagram(
-  all,
-  category.names = c("Bare ground" , "Alternating cover" , "Complete cover"),
-  filename = NULL)
+plt <- venn.diagram(all,
+                    category.names = c("Bare ground" , "Alternating cover" ,
+                                       "Complete cover"),
+                    filename = NULL)
 grid::grid.draw(plt)
 
 
-## Prepare datasets for VennDiagram with core microbiome per treatment
-## Bare ground
-BG <- subset_samples(wine.a, treatment == "BareGround") # select bare ground samples
-core.BG <- wine.core <- core(BG, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 95% of the samples
+## Prepare data sets for VennDiagram with core microbiome per treatment
+## Select "Bare ground" samples
+BG <- subset_samples(wine.a, treatment == "BareGround")
+core.BG <- wine.core <- core(BG, detection = .0005, prevalence = .90)
 core.BG <- prune_taxa(taxa_sums(core.BG) > 0, core.BG) # only keep OTUs >0
 core.BG <- row.names(tax_table(core.BG))
 
 
-## Alternating cover
-AC <- subset_samples(wine.a, treatment == "AlternatingCover") # select bare ground samples
-core.AC <- wine.core <- core(AC, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 95% of the samples
+## Select "Alternating cover" samples
+AC <- subset_samples(wine.a, treatment == "AlternatingCover")
+core.AC <- wine.core <- core(AC, detection = .0005, prevalence = .90)
 core.AC <- prune_taxa(taxa_sums(core.AC) > 0, core.AC) # only keep OTUs >0
 core.AC <- row.names(tax_table(core.AC))
 
 
-## Complete cover
-CC <- subset_samples(wine.a, treatment == "CompleteCover") # select bare ground samples
-core.CC <- wine.core <- core(CC, detection = .0005, prevalence = .90) # a minimum abundance of 0.05 % and prevalent in 95% of the samples
+## Select "Complete cover" samples
+CC <- subset_samples(wine.a, treatment == "CompleteCover")
+core.CC <- wine.core <- core(CC, detection = .0005, prevalence = .90)
 core.CC <- prune_taxa(taxa_sums(core.CC) > 0, core.CC) # only keep OTUs >0
 core.CC <- row.names(tax_table(core.CC))
 
+
+## Add them to a list
 core <- list(core.BG, core.AC, core.CC)
 
 
-## Chart
+## Venn diagram
 dev.off()
-plt <- venn.diagram(
-  core,
-  category.names = c("Bare ground" , "Alternating cover" , "Complete cover"),
-  filename = NULL)
-grid::grid.draw(plt)
-
-
-####
-dev.off()
-
-
 plt <- venn.diagram(core,
                     category.names = c("Bare ground" , "Alternating cover" ,
                                        "Complete cover"),
                     filename = NULL,
-
                     # Circles
-                    lwd = 2,
-                    lty = 'blank',
-                    fill = cols,
-
+                    lwd = 2, lty = 'blank', fill = cols,
                     # Numbers
-                    cex = .6,
-                    fontface = "bold",
-                    fontfamily = "sans",
-
+                    cex = 1, fontfamily = "sans",
                     # Set names
-                    cat.cex = 0.6,
-                    cat.fontface = "bold",
+                    cat.cex = 0.6, cat.fontface = "bold",
                     cat.default.pos = "outer",
                     cat.pos = c(-27, 27, 135),
                     cat.dist = c(0.055, 0.055, 0.085),
-                    cat.fontfamily = "sans",
-                    rotation = 1)
+                    cat.fontfamily = "sans", rotation = 1)
 grid::grid.draw(plt)
 
 
 ################################################################################
 ################################################################################
-
-
-
