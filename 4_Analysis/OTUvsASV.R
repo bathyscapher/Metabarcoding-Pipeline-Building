@@ -1,5 +1,11 @@
-#### ASV vs OTUs
-## Venn diagram
+###############################################################################
+################################################################################
+### Metabarcoding Pipeline Building: CUSO Workshop
+### OTUs vs. ASVs
+### Gerhard Thallinger, Rachel Korn & Magdalena Steiner 2021
+### korn@cumulonimbus.at
+################################################################################
+################################################################################
 
 
 library("phyloseq")
@@ -9,6 +15,10 @@ library("gridExtra")
 
 rm(list = ls())
 setwd("/home/rstudio/")
+
+
+## Colorblind scale
+cols <- c("#C59434", "#999999", "#009E73") # brown, gray, green
 
 
 ################################################################################
@@ -94,8 +104,8 @@ tax.otu <- readTaxa("OTU","16S","RDP")
 ################################################################################
 ### Remove singletons ###
 sum(taxa_sums(tax.asv) == 1)
-tax.asv <- prune_taxa(taxa_sums(tax.asv) > 1, tax.asv)
-tax.asv
+# tax.asv <- prune_taxa(taxa_sums(tax.asv) > 1, tax.asv)
+# tax.asv
 
 
 sum(taxa_sums(tax.otu) == 1)
@@ -143,3 +153,79 @@ venn <- draw.pairwise.venn(length(s1), length(s2), length(over), fill=c(2,3),
                            cat.col=c(2,3), category=c("ASV", "OTU"))
 grid.arrange(gTree(children = venn), top = "On the order-level")
 
+
+################################################################################
+### Add metadata
+metadata <- read.csv("Metabarcoding-Pipeline-Building/Metadata_corr.csv",
+                     sep = ",", header = TRUE, row.names = 1)
+
+metadata$treatment[metadata$treatment == 'AC'] <- 'AlternatingCover'
+metadata$treatment[metadata$treatment == 'BG'] <- 'BareGround'
+metadata$treatment[metadata$treatment == 'CC'] <- 'CompleteCover'
+
+
+## Code vineyard names as factors
+metadata$treatment <- as.factor(metadata$treatment)
+
+
+## Rename and sort factors
+metadata$ord.treatment <- factor(metadata$treatment)
+levels(metadata$ord.treatment) <- c("AlternatingCover", "BareGround",
+                                    "CompleteCover")
+metadata$ord.treatment <- ordered(metadata$ord.treatment,
+                                  levels = c("BareGround", "AlternatingCover",
+                                             "CompleteCover"))
+
+
+tax.otu <- merge_phyloseq(tax.otu, sample_data(metadata))
+tax.asv <- merge_phyloseq(tax.asv, sample_data(metadata))
+
+
+### Compare OTU and ASV communities in a nMDS
+set.seed(11948)
+
+otu.nmds <- ordinate(tax.otu, "NMDS", "bray", autotransform = FALSE,
+                     trymax = 50, k = 2)
+otu.nmds
+stressplot(otu.nmds)
+
+
+set.seed(11948)
+asv.nmds <- ordinate(tax.asv, "NMDS", "bray", autotransform = FALSE,
+                     trymax = 50, k = 2)
+asv.nmds
+stressplot(asv.nmds)
+
+
+p.asv.nmds <- plot_ordination(tax.asv, asv.nmds, color = "ord.treatment",
+                shape = "ord.treatment") +
+  geom_point(size = 5) +
+  scale_shape_manual(values = c(18, 16, 17)) +
+  scale_color_manual(values = cols) +
+  geom_text(aes(label = sample_data(tax.asv)$vineyard), color = "black",
+            size = 3) +
+  ggtitle("NMDS of Bray-Curtis distance") +
+  theme(legend.position = "none") +
+  coord_fixed(ratio = 1) +
+  stat_ellipse(aes(group = ord.treatment), type = "t", linetype = 2, size = 0.2)
+
+
+p.otu.nmds <- plot_ordination(tax.otu, otu.nmds, color = "ord.treatment",
+                shape = "ord.treatment") +
+  geom_point(size = 5) +
+  scale_shape_manual(values = c(18, 16, 17)) +
+  scale_color_manual(values = cols) +
+  geom_text(aes(label = sample_data(tax.otu)$vineyard), color = "black",
+            size = 3) +
+  ggtitle("NMDS of Bray-Curtis distance") +
+  theme(legend.position = "none") +
+  
+  coord_fixed(ratio = 1) +
+  stat_ellipse(aes(group = ord.treatment), type = "t", linetype = 2, size = 0.2)
+
+
+grid.arrange(p.otu.nmds, p.asv.nmds, ncol = 2)
+
+
+################################################################################
+################################################################################
