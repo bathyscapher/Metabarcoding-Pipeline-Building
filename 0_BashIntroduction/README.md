@@ -50,7 +50,7 @@ which R
 git clone https://github.com/bathyscapher/Metabarcoding-Pipeline-Building
 ```
 
-To update a git repository:
+To update a git repository (might fail if you have local changes on your computer):
 ```
 git pull
 ```
@@ -156,11 +156,3 @@ Each bash command has a help page:
 ```
 man R
 ```
-
-## Download workshop data and failsafes
-```
-# mothur failsafe
-wget -P /home/rstudio/prok/filtered --content-disposition https://cumulonimbus.capillatus.sunch.at/index.php/s/48NBTycizzCLTkd/download
-```
-
-
