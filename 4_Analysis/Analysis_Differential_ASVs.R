@@ -8,23 +8,20 @@
 ################################################################################
 
 
-# Load helper function
-# https://joey711.github.io/phyloseq-extensions/edgeR.html
-# source("Metabarcoding-Pipeline-Building/4_Analysis/phyloseq_to_edgeR.R")
-
-
 library("phyloseq")
 library("ggplot2")
-theme_set(theme_bw(base_size = 20) +
-            theme(rect = element_rect(fill = "transparent")))
+theme_set(theme_bw(base_size = 20))
 
-# Install and load the DeSeq2 library
+
+## Install (if necessary) and load the DeSeq2 library
 suppressMessages(deseq2_installed <- require(DESeq2))
 if (!deseq2_installed) {
   BiocManager::install("DESeq2")
-}
-library(DESeq2)
+  }
+
+library("DESeq2")
 packageVersion("DESeq2")
+
 
 rm(list = ls())
 setwd("/home/rstudio/")
@@ -103,14 +100,17 @@ readTaxa <- function(method = c("OTU", "ASV"), primer = c("16S", "18S"),
   return(wine)
 }
 
-# Read the metadata of the study 
+
+## Read the metadata of the study 
 metadata <- read.csv("Metabarcoding-Pipeline-Building/Metadata_corr.csv",
                      sep = ",", header = TRUE, row.names = 1)
 head(metadata)
 
+
 metadata$treatment[metadata$treatment == 'AC'] <- 'AlternatingCover'
 metadata$treatment[metadata$treatment == 'BG'] <- 'BareGround'
 metadata$treatment[metadata$treatment == 'CC'] <- 'CompleteCover'
+
 
 ## Code vineyard names as factors
 metadata$treatment <- as.factor(metadata$treatment)
@@ -124,61 +124,90 @@ metadata$ord.treatment <- ordered(metadata$ord.treatment,
                                   levels = c("BareGround", "AlternatingCover",
                                              "CompleteCover"))
 
+
+## Read OTU/ASV table
 tax.asv <- readTaxa("ASV", "16S", "RDP")
 sample_data(tax.asv) <- metadata
 tax.asv
+
 
 tax.otu <- readTaxa("OTU", "16S", "RDP")
 tax.otu <- prune_taxa(taxa_sums(tax.otu) > 1, tax.otu)
 sample_data(tax.otu) <- metadata
 tax.otu
 
-# Determine differentially abundant taxa based on the treatment
-# DESeq2 does not handle ordered factors
-#
+
+## Determine differentially abundant taxa based on the treatment
+## Note: DESeq2 does not handle ordered factors
+
 tax.asv.deseq <- phyloseq_to_deseq2(tax.asv, ~treatment)
 
-gm_mean = function(x, na.rm=TRUE){
-  exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
-}
 
+## Function to calculate the geometric mean
+gm_mean <- function(x, na.rm = TRUE){
+  exp(sum(log(x[x > 0]), na.rm = na.rm) / length(x))
+  }
+
+
+## Calculate the geometric mean
 geoMeans <- apply(counts(tax.asv.deseq), 1, gm_mean)
 tax.asv.deseq.sf <- estimateSizeFactors(tax.asv.deseq, geoMeans = geoMeans)
-tax.asv.deseq.de <- DESeq(tax.asv.deseq.sf, fitType="local")
 
-# Order results by decreasing adjusted p-value
-res = results(tax.asv.deseq.de)
-res = res[order(res$padj, na.last=NA), ]
+tax.asv.deseq.de <- DESeq(tax.asv.deseq.sf, fitType = "local")
+
+
+## Order results by decreasing adjusted p-value
+res <- results(tax.asv.deseq.de)
+res <- res[order(res$padj, na.last = NA), ]
 dim(res)
 head(res)
 
-# Extract all taxa differentially abundant at a significance level 0.05
-alpha = 0.05
-sigtab.raw = res[(res$padj < alpha), ]
-sigtab = cbind(as(sigtab.raw, "data.frame"), as(tax_table(tax.asv)[rownames(sigtab.raw), ], "matrix"))
+
+## Extract all taxa differentially abundant at a significance level 0.05
+alpha <- 0.05
+sigtab.raw <- res[(res$padj < alpha), ]
+dim(sigtab.raw)
+sigtab <- cbind(as(sigtab.raw, "data.frame"),
+                as(tax_table(tax.asv)[rownames(sigtab.raw), ], "matrix"))
 head(sigtab)
 dim(sigtab)
 
 
-# Plot the fold-change of the DA taxa with the Genus information and color
-# by phylum
-theme_set(theme_bw())
-sigtabgen = subset(sigtab, !is.na(Genus))
-# Phylum order
-x = tapply(sigtabgen$log2FoldChange, sigtabgen$Phylum, function(x) max(x))
-x = sort(x, TRUE)
-sigtabgen$Phylum = factor(as.character(sigtabgen$Phylum), levels=names(x))
+## Plot the fold-change of the DA taxa with the genus information and color
+## by phylum
+sigtabgen <- subset(sigtab, !is.na(Genus))
+dim(sigtabgen)
 
-# Genus order
-x = tapply(sigtabgen$log2FoldChange, sigtabgen$Genus, function(x) max(x))
-x = sort(x, TRUE)
-sigtabgen$Genus = factor(as.character(sigtabgen$Genus), levels=names(x))
-ggplot(sigtabgen, aes(y=Genus, x=log2FoldChange, color=Phylum)) + 
+
+## Phylum order: sort by log2FoldChange and sort phyla accordingly
+x <- tapply(sigtabgen$log2FoldChange, sigtabgen$Phylum, function(x) max(x))
+x <- sort(x, TRUE)
+
+
+sigtabgen$Phylum <- factor(as.character(sigtabgen$Phylum), levels = names(x))
+
+
+## Genus order: sort by log2FoldChange and sort genera accordingly
+x <- tapply(sigtabgen$log2FoldChange, sigtabgen$Genus, function(x) max(x))
+x <- sort(x, TRUE)
+
+
+sigtabgen$Genus <- factor(as.character(sigtabgen$Genus), levels = names(x))
+
+
+## Plot
+ggplot(sigtabgen, aes(y = Genus, x = log2FoldChange, color = Phylum)) + 
   geom_vline(xintercept = 0.0, color = "gray", size = 0.5) +
-  geom_point(size=6) + labs(title="CompleteCover vs AlternatingCover") +
-  theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust=0.5))
+  geom_point(size = 6) +
+  labs(title = "CompleteCover vs AlternatingCover") +
+  theme(axis.text.x = element_text(angle = -90, hjust = 0, vjust = 0.5))
 
-#========================================================================
-# Exercise: DA between 2 groups only
+
+################################################################################
+## Exercise: DA between 2 groups only
 table(sample_data(tax.asv)$treatment)
 subset_samples(tax.asv, sample_data(tax.asv)$treatment != "CompleteCover")
+
+
+################################################################################
+################################################################################
